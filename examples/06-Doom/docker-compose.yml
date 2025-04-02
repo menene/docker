@@ -1,0 +1,6 @@
+
+services:
+  doom-app:
+    image: callumhoughton22/doom-in-docker:0.1
+    ports: 
+        - 8880:8080

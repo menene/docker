@@ -1,0 +1,35 @@
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "3003:3000"
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "8180:80"
+
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: demo_db
+    ports:
+      - "5438:5432"
+
+  adminer:
+    image: adminer
+    ports:
+      - "8081:8080"
+
+  nginx:
+    image: nginx:alpine
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+      - frontend

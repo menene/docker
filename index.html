@@ -1,0 +1,421 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Introducción a Docker</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/theme/dracula.min.css">
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            <!-- Portada -->
+            <section>
+                <img src="./assets/logo.png" class="card-img-top img-fluid" alt="CSS">
+                <p>Erick Marroquín, 2025</p>
+            </section>
+
+            <!-- Virtualización -->
+            <section>
+                <section>
+                    <h2>Virtualización</h2>
+                    <p>Contexto</p>
+                </section>
+                <section>
+                    <p>Tecnología que permite crear múltiples entornos virtuales a partir de un único sistema físico (hardware).</p>
+                </section>
+                <section>
+                    <p>Hipervisor actúa como una capa de abstracción entre el hardware físico y las máquinas virtuales.</p>
+                </section>
+                <section>
+                    <p>Se simula el hardware completo.</p>
+                </section>
+                <section>
+                    <h3>Ventajas (VMs)</h3>
+                    <ul>
+                        <li>Aislamiento completo</li>
+                        <li>Seguridad mejorada</li>
+                        <li>Compatibilidad con múltiples SO</li>
+                        <li>Flexibilidad</li>
+                        <li>Escalabilidad</li>
+                    </ul>
+                </section>
+                <section>
+                    <h3>Desventajas (VMs)</h3>
+                    <ul>
+                        <li>Alto consumo de recursos</li>
+                        <li>Arranque lento</li>
+                        <li>Mayor espacio en disco</li>
+                    </ul>
+                </section>
+            </section>
+
+            <!-- Contenerización -->
+            <section>
+                <section>
+                    <h2>Contenerización</h2>
+                    <p>Contexto</p>
+                </section>
+                <section>
+                    <p>La contenerización es el proceso de empaquetar una aplicación junto con sus dependencias en un contenedor.</p>
+                </section>
+                <section>
+                    <p>El contenedor garantiza que la aplicación funcione de manera consistente en cualquier entorno.</p>
+                </section>
+                <section>
+                    <p>Se comparte el núcleo con el sistema operativo.</p>
+                </section>
+                <section>
+                    <h3>Ventajas</h3>
+                    <ul>
+                        <li>Portabilidad</li>
+                        <li>Reproducibilidad</li>
+                        <li>Aislamiento</li>
+                        <li>Escalabilidad</li>
+                    </ul>
+                </section>
+            </section>
+
+            <!-- Docker -->
+            <section>
+                <section>
+                    <h2>Docker</h2>
+                </section>
+                <section>
+                    <h3>Docker como Tecnología</h3>
+                    <p>La tecnología de Docker se basa en el uso de contenedores para empaquetar y desplegar aplicaciones.</p>
+                </section>
+                <section>
+                    <p>Es una implementación de la virtualización a nivel de sistema operativo.</p>
+                </section>
+                <section>
+                    <h3>Docker como Producto</h3>
+                    <p>Docker Inc. es la empresa que desarrolla el software.</p>
+                </section>
+                <section>
+                    <p>Docker es el nombre del producto que utiliza la tecnología de contenedores.</p>
+                    <p>Tupperware, Kleenex, Jacuzzi</p>
+                </section>
+                <section>
+                    <p>Incluye herramientas como Docker Engine, Docker Compose y Docker Hub.</p>
+                </section>
+                <section>
+                    <h3>¿Qué ofrece Docker como producto?</h3>
+                    <ul>
+                        <li>CLI para gestionar contenedores.</li>
+                        <li>Herramientas de orquestación y despliegue.</li>
+                        <li>Repositorios públicos y privados en Docker Hub.</li>
+                    </ul>
+                </section>
+                <section>
+                    <h3>Alternativas</h3>
+                    <ul>
+                        <li>Podman: Alternativa sin daemon.</li>
+                        <li>rkt: Solución de contenedores de CoreOS.</li>
+                        <li>LXC: Contenedores ligeros en Linux.</li>
+                    </ul>
+                </section>
+                <section>
+                    <h3>¿Por qué elegir Docker?</h3>
+                    <ul>
+                        <li>Amplio ecosistema y documentación.</li>
+                        <li>Integración continua con servicios como Kubernetes.</li>
+                        <li>Facilidad de uso para desarrolladores y DevOps.</li>
+                    </ul>
+                </section>
+            </section>
+            
+            <!-- Qué no es Docker -->
+            <section>
+                <section>
+                    <h2>¿Qué <b>NO</b> es Docker?</h2>
+                </section>
+                <section>
+                    <ul>
+                        <li>No es una máquina virtual.</li>
+                        <li>No reemplaza sistemas completos.</li>
+                        <li>No es un reemplazo directo para aplicaciones nativas.</li>
+                    </ul>
+                    <p></p>
+                </section>
+            </section>
+            
+
+            <!-- Qué es Docker -->
+            <section>
+                <section>
+                    <h2>¿Qué es Docker?</h2>
+                </section>
+                <section>
+                    <p>Docker es una plataforma para construir, enviar y ejecutar aplicaciones en contenedores.</p>
+                </section>
+                <section>
+                    <p>Los contenedores permiten empaquetar una aplicación y todas sus dependencias en un solo paquete.</p>
+                </section>
+                <section>
+                    <p>Esto garantiza que la aplicación se ejecute de manera consistente en cualquier entorno.</p>
+                </section>
+                <section>
+                    <h3>¿Por qué usar Docker?</h3>
+                    <ul>
+                        <li>Portabilidad</li>
+                        <li>Aislamiento</li>
+                        <li>Eficiencia</li>
+                        <li>Despliegue Rápido</li>
+                        <li>Paz Mental</li>
+                    </ul>
+                </section>
+                <section>
+                    <h3>¿Qué resuelve Docker?</h3>
+                    <ul>
+                        <li>Problemas de compatibilidad entre entornos (desarrollo/producción).</li>
+                        <li>Conflictos de dependencias entre proyectos.</li>
+                        <li>Complejidad en el despliegue de aplicaciones complejas.</li>
+                    </ul>
+                </section>
+                <section>
+                    <p>"En mi compu si corre pero en el servidor no 😩😭🤬"</p>
+                </section>
+            </section>
+            
+
+            <!-- Componentes de Docker -->
+            <section>
+                <section>
+                    <h2>Componentes de Docker</h2>
+                </section>
+            
+                <section>
+                    <h3>Docker Engine</h3>
+                    <p>Es el núcleo de Docker, responsable de crear y ejecutar contenedores.</p>
+                </section>
+                <section>
+                    <ul>
+                        <li>Daemon: Administra contenedores y escucha comandos.</li>
+                        <li>API: Permite interactuar con el daemon.</li>
+                        <li>CLI: Interfaz de línea de comandos.</li>
+                    </ul>
+                </section>
+                <section>
+                    <img src="./assets/engine.png" class="card-img-top img-fluid" alt="CSS">
+                </section>
+
+                <section>
+                    <h3>Dockerfile</h3>
+                    <p>Archivo de texto que contiene instrucciones para crear una imagen.</p>
+                </section>
+                <section>
+                    <ul>
+                        <li>Define el entorno de la aplicación.</li>
+                        <li>Especifica dependencias y configuraciones.</li>
+                    </ul>
+                </section>
+                <section>
+                    <h3>Ejemplo:</h3>
+                    <pre><code>FROM node:14
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm install
+
+COPY . .
+
+CMD ["node", "index.js"]</code></pre>
+                </section>
+            
+                <section>
+                    <h3>Imágenes</h3>
+                    <p>Archivos inmutables que contienen el entorno de ejecución y la aplicación.</p>
+                    <p>Se crean a partir de un Dockerfile y sirven como plantilla para crear contenedores.</p>
+                </section>
+                <section>
+                    <ul>
+                        <li>Capas: Cada instrucción en el Dockerfile genera una capa en la imagen.</li>
+                        <li>Almacenamiento: Se guardan en el registro.</li>
+                    </ul>
+                    <img src="./assets/layers.png" class="card-img-top img-fluid" alt="CSS">
+                </section>
+            
+                <section>
+                    <h3>Contenedores</h3>
+                    <p>Instancias en ejecución basadas en imágenes.</p>
+                </section>
+                <section>
+                    <ul>
+                        <li>Son ligeros y rápidos porque comparten el núcleo del host.</li>
+                        <li>Cada contenedor es independiente y tiene su propio sistema de archivos.</li>
+                        <li>Persistencia de datos mediante volúmenes.</li>
+                    </ul>
+                </section>
+                <section>
+                    <img src="./assets/flow.png" class="card-img-top img-fluid" alt="CSS">
+                </section>
+            
+                <section>
+                    <h3>Docker Hub</h3>
+                    <p>Repositorio público y privado de imágenes Docker.</p>
+                </section>
+                <section>
+                    <ul>
+                        <li>Almacén centralizado para compartir y descargar imágenes.</li>
+                        <li>Imágenes oficiales: Mantenidas por Docker.</li>
+                        <li>Imágenes de la comunidad: Subidas por usuarios.</li>
+                    </ul>
+                </section>
+                <section>
+                    <img src="./assets/hub.png" class="card-img-top img-fluid" alt="CSS">
+                </section>
+
+                <section>
+                    <h1>🤓</h1>
+                    <h2>Demos</h2>
+                </section>
+
+                <section>
+                    <h3>Docker Compose</h3>
+                    <p>Herramienta para definir y ejecutar aplicaciones multi-contenedor.</p>
+                </section>
+                <section>
+                    <ul>
+                        <li>Usa un archivo docker-compose.yml para configurar servicios.</li>
+                        <li>Permite manejar múltiples contenedores con <b>un solo comando</b>.</li>
+                        <li>Comparte red con todos los contenedores.</li>
+                    </ul>
+                </section>
+                <section >
+                    <h3>Ejemplo:</h3>
+                    <pre>
+                <code>
+services:
+    nginx:
+    image: nginx:latest
+    container_name: my-nginx
+    ports:
+        - "8080:80"
+                </code>
+                    </pre>
+                </section>
+            </section>
+
+            <!-- Aclaración -->
+            <section>
+                <section>
+                    <h1>✋🏽</h1>
+                    <h2>Antes de continuar...</h2>
+                </section>
+                <section>
+                    <p><b>Host:</b> máquina en donde está corriendo docker.</p>
+                    <p><b>Contenedor:</b> máquina generada con contenerización.</p>
+                </section>
+                <section>
+                    <img src="./assets/take-this.png" class="card-img-top img-fluid" alt="CSS" width="30%">
+                    <p>El comando <code>docker ps</code> lista los contenedores que están corriendo.</p>
+                </section>
+            </section>
+            
+
+            <!-- Puertos -->
+            <section>
+                <section>
+                    <h2>Puertos</h2>
+                </section>
+                <section>
+                    <p>Los contenedores en Docker funcionan en una red interna aislada.</p>
+                    <p>Para que el host pueda acceder a los servicios dentro del contenedor, es necesario <b>mapear</b> los puertos.</p>
+                </section>
+                <section>
+                    <p>Podemos mapear cuantos puertos necesite nuestra aplicación.</p>
+                    <p>Brindan un punto de acceso desde el <b>Host</b> hacia el <b>Contenedor</b></p>
+                </section>
+                <section>
+                    <ul>
+                        <li>El puerto 8080 se enlaza al 80 (HTTP).</li>
+                        <li>El puerto 8443 se enlaza al 443 (HTTPS).</li>
+                    </ul>
+                </section>
+                <section>
+                    <h3>Consideraciones Importantes</h3>
+                    <ul>
+                        <li>El puerto del host debe estar libre antes de asignarlo.</li>
+                        <li>Los puertos en uso no pueden ser mapeados nuevamente.</li>
+                        <li>Si no se especifica el puerto del host, Docker asigna uno aleatorio.</li>
+                    </ul>
+                </section>
+            </section>
+            
+
+            <!-- Volúmenes -->
+            <section>
+                <section>
+                    <h2>Volúmenes</h2>
+                </section>
+                <section>
+                    <p>Los volúmenes en Docker permiten almacenar datos de manera persistente fuera del contenedor.</p>
+                    <p>Esto asegura que los datos no se pierdan si el contenedor se elimina.</p>
+                </section>
+                <section>
+                    <h3>Tipos de volúmenes en Docker</h3>
+                    <ul>
+                        <li><strong>Volúmenes con Nombre:</strong> Administrados por Docker y con nombre asignado.</li>
+                        <li><strong>Enlaces (Bind Mounts):</strong> Se conecta un directorio del host al contenedor.</li>
+                    </ul>
+                </section>
+                <section>
+                    <h3>¿Cuándo usar volúmenes?</h3>
+                    <ul>
+                        <li>Para almacenar datos que necesitan persistir tras eliminar el contenedor.</li>
+                        <li>Para compartir archivos entre múltiples contenedores.</li>
+                        <li>Para respaldos y migración de datos.</li>
+                    </ul>
+                </section>
+            </section>
+            
+
+            <!-- Redes -->
+            <section>
+                <section>
+                    <h2>Redes</h2>
+                </section>
+                <section>
+                    <p>Las redes en Docker permiten que los contenedores se comuniquen entre sí y con el host.</p>
+                    <p>Proporcionan aislamiento y gestionan el tráfico entre contenedores.</p>
+                </section>
+            </section>
+
+            <!-- Demo -->
+            <section>
+                <img src="./assets/morphing_time.jpeg" class="card-img-top img-fluid" alt="CSS" width="30%">
+                <h2>It's Demo Time</h2>
+            </section>
+            
+            <!-- Resumen -->
+            <section>
+                <section><h2>Resumen</h2></section>
+                <section>
+                    <p>Docker permite el despliegue ágil y la gestión eficiente de aplicaciones en contenedores.</p>
+                    <p>Mejora la portabilidad.</p>
+                    <p>Nos hace la vida más fácil.</p>
+                </section>
+                <section>
+                    <h1>¡Aprendan Docker!</h1>
+                </section>
+            </section>
+
+            <!-- Dudas -->
+            <section>
+                <h1>🙋🏽🙋🏼‍♀️</h1>
+                <h2>¿Dudas?</h2>
+            </section>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.js"></script>
+    <script>
+        Reveal.initialize();
+    </script>
+</body>
+</html>
