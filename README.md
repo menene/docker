@@ -40,6 +40,13 @@ Cada uno de estos proyectos tiene su propio archivo README.md con instrucciones 
 
 ---
 
+## 📼 Recursos multimedia
+
+- [100+ Docker Concepts you Need to Know](https://www.youtube.com/watch?v=rIrNIzy6U_g)
+- [Learn Docker in 7 Easy Steps - Full Beginner's Tutorial](https://www.youtube.com/watch?v=gAkwW2tuIqE)
+- [you need to learn Docker RIGHT NOW!! // Docker Containers 101](https://www.youtube.com/watch?v=eGz9DS-aIeY)
+- [DOCKER De NOVATO a PRO! (CURSO COMPLETO EN ESPAÑOL)](https://www.youtube.com/watch?v=CV_Uf3Dq-EU)
+
 ## 📝 Notas
 
 - Asegúrate de tener Docker y Docker Compose instalados.
