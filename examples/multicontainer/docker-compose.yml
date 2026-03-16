@@ -1,0 +1,25 @@
+services:
+  db:
+    build: ./db
+    volumes:
+      - db-data:/data
+
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - db-data:/data
+    depends_on:
+      db:
+        condition: service_completed_successfully
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+volumes:
+  db-data:

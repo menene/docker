@@ -1,8 +1,8 @@
 
 services:
-  dokuwiki:
-    image: lscr.io/linuxserver/dokuwiki:latest
-    container_name: dokuwiki
+  libreoffice:
+    image: lscr.io/linuxserver/libreoffice:latest
+    container_name: libreoffice
     environment:
       - PUID=1000
       - PGID=1000
@@ -10,4 +10,5 @@ services:
     volumes:
       - ./config:/config
     ports:
-      - 8090:80
+      - 3009:3000
+      - 3002:3001

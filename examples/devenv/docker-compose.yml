@@ -36,6 +36,6 @@ services:
       - ./vscode:/config
       - ./:/source
     ports:
-      - 3800:3000
-      - 3001:3001
+      - 3810:3000
+      - 3004:3001
     shm_size: "1gb"

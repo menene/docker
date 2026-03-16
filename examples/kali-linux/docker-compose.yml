@@ -1,0 +1,16 @@
+services:
+  kali-linux:
+    image: lscr.io/linuxserver/kali-linux:latest
+    container_name: kali-linux
+    security_opt:
+      - seccomp:unconfined
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Guatemala
+    volumes:
+      - ./config:/config
+    ports:
+      - "3000:3000"   # HTTP desktop (KasmVNC)
+      - "3001:3001"   # HTTPS desktop (KasmVNC)
+    restart: unless-stopped

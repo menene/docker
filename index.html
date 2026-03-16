@@ -1,383 +1,344 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Docker</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/theme/dracula.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Docker — CC3062</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Inter:wght@300;400;500;600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #f8fafc; }
+    h1, h2, h3 { font-family: 'Montserrat', sans-serif; }
+    .mono { font-family: 'Fira Code', monospace; }
+
+    .hero-bg {
+      background: linear-gradient(135deg, #001f5c 0%, #0a3080 40%, #1565c0 70%, #2496ED 100%);
+    }
+
+    .card-hover {
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .card-hover:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px rgba(36,150,237,0.18);
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      background: rgba(36,150,237,0.1);
+      color: #0369a1;
+      border: 1px solid rgba(36,150,237,0.25);
+      border-radius: 999px;
+      padding: 0.2rem 0.75rem;
+      font-size: 0.75rem;
+      font-family: 'Fira Code', monospace;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-8px); }
+    }
+    .float { animation: float 4s ease-in-out infinite; }
+
+    .grid-dots {
+      background-image: radial-gradient(circle, rgba(255,255,255,0.12) 1px, transparent 1px);
+      background-size: 28px 28px;
+    }
+  </style>
 </head>
-<body>
-    <div class="reveal">
-        <div class="slides">
-            <!-- Portada -->
-            <section>
-                <img src="./assets/logo.png" class="card-img-top img-fluid" alt="CSS">
-                <p>Erick Marroquín, 2025</p>
-            </section>
+<body class="min-h-screen">
 
-            <!-- Virtualización -->
-            <section>
-                <section>
-                    <h2>Virtualización</h2>
-                    <p>Contexto</p>
-                </section>
-                <section>
-                    <p>Tecnología que permite crear múltiples entornos virtuales a partir de un único sistema físico (hardware).</p>
-                </section>
-                <section>
-                    <p>Hipervisor actúa como una capa de abstracción entre el hardware físico y las máquinas virtuales.</p>
-                </section>
-                <section>
-                    <p>Se simula el hardware completo.</p>
-                </section>
-                <section>
-                    <h3>Ventajas</h3>
-                    <ul>
-                        <li>Aislamiento completo</li>
-                        <li>Seguridad mejorada</li>
-                        <li>Compatibilidad con múltiples SO</li>
-                        <li>Flexibilidad</li>
-                        <li>Escalabilidad</li>
-                    </ul>
-                </section>
-                <section>
-                    <h3>Desventajas</h3>
-                    <ul>
-                        <li>Alto consumo de recursos</li>
-                        <li>Arranque lento</li>
-                        <li>Mayor espacio en disco</li>
-                    </ul>
-                </section>
-            </section>
+  <!-- ── HERO ── -->
+  <section style="padding: 5rem 1.5rem 4rem; background: linear-gradient(135deg, #001f5c 0%, #0a3080 40%, #1565c0 70%, #2496ED 100%); background-image: linear-gradient(135deg, #001f5c 0%, #0a3080 40%, #1565c0 70%, #2496ED 100%), radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: cover, 28px 28px; color: white;">
+    <div style="max-width:820px;margin:0 auto;text-align:center;">
 
-            <!-- Contenerización -->
-            <section>
-                <section>
-                    <h2>Contenerización</h2>
-                    <p>Contexto</p>
-                </section>
-                <section>
-                    <p>La contenerización es el proceso de empaquetar una aplicación junto con sus dependencias en un contenedor.</p>
-                </section>
-                <section>
-                    <p>El contenedor garantiza que la aplicación funcione de manera consistente en cualquier entorno.</p>
-                </section>
-                <section>
-                    <p>Se comparte el núcleo con el sistema operativo.</p>
-                </section>
-                <section>
-                    <h3>Ventajas</h3>
-                    <ul>
-                        <li>Portabilidad</li>
-                        <li>Reproducibilidad</li>
-                        <li>Aislamiento</li>
-                        <li>Escalabilidad</li>
-                        <li>Agilización de procesos</li>
-                    </ul>
-                </section>
-                <section>
-                    <h3>Desventajas</h3>
-                    <ul>
-                        <li>Complejidad.</li>
-                        <li>Riesgos de seguridad (update).</li>
-                        <li>Almacenamiento persistente.</li>
-                        <li>Dificultad para depurar problemas.</li>
-                        <li>Desempeño puede verse afectado.</li>
-                    </ul>
-                </section>
-                
-            </section>
+      <div class="float" style="margin-bottom:1.8rem;">
+        <img src="docker-logo-ocean-blue.png"
+             style="width:260px;filter:brightness(0) invert(1);margin:0 auto;display:block;"
+             alt="Docker">
+      </div>
 
-            <!-- Aclaración -->
-            <section>
-                <section>
-                    <h1>✋🏽</h1>
-                    <h2>Antes de continuar...</h2>
-                </section>
-                <section>
-                    <p><b>Host:</b> máquina en donde está corriendo docker.</p>
-                    <p><b>Contenedor:</b> máquina generada con contenerización.</p>
-                </section>
-                <section>
-                    <img src="./assets/take-this.png" class="card-img-top img-fluid" alt="CSS" width="30%">
-                    <p>El comando <code>docker ps</code> lista los contenedores que están corriendo.</p>
-                </section>
-            </section>
+      <h1 style="font-size:2.6rem;font-weight:800;margin:0 0 1rem;line-height:1.15;color:white;">
+        Introducción a Docker
+      </h1>
 
-            <!-- Docker -->
-            <section>
-                <section>
-                    <h2>Docker</h2>
-                </section>
-                <section>
-                    <p>Docker es una plataforma de software que utiliza la tecnología de contenedores para crear, desplegar y ejecutar aplicaciones.</p>
-                </section>
-                <section>
-                    <p>Permite a los desarrolladores <p>empaquetar</p> aplicaciones y sus dependencias en contenedores.</p>
-                </section>
-                <section>
-                    <p>Esto garantiza que la aplicación se ejecute de manera consistente en cualquier entorno.</p>
-                </section>
-                <section>
-                    <p>Lanzado en 2013 por la empresa Docker Inc.</p>
-                </section>
-                <section>
-                    <p>Docker es el nombre del producto que utiliza la tecnología de contenedores.</p>
-                    <p>Tupperware || Kleenex || Maseca || Pritt</p>
-                </section>
-                <section>
-                    <h3>¿Qué ofrece Docker Inc.?</h3>
-                    <ul>
-                        <li>CLI para gestionar contenedores.</li>
-                        <li>Herramientas de orquestación y despliegue.</li>
-                        <li>Repositorios públicos y privados en Docker Hub.</li>
-                    </ul>
-                </section>
-                <section>
-                    <h3>Alternativas</h3>
-                    <ul>
-                        <li>Podman: Alternativa sin daemon.</li>
-                        <li>rkt: Solución de contenedores de CoreOS.</li>
-                        <li>LXC: Contenedores ligeros en Linux.</li>
-                    </ul>
-                </section>
-                <section>
-                    <h3>¿Por qué elegir Docker?</h3>
-                    <ul>
-                        <li>Amplio ecosistema y documentación.</li>
-                        <li>Integración continua con servicios como Kubernetes.</li>
-                        <li>Facilidad de uso para desarrolladores y DevOps.</li>
-                        <li>Paz Mental</li>
-                    </ul>
-                </section>
-                <section>
-                    <h3>¿Qué resuelve Docker?</h3>
-                    <ul>
-                        <li>Problemas de compatibilidad entre entornos (desarrollo/producción).</li>
-                        <li>Conflictos de dependencias entre proyectos.</li>
-                        <li>Complejidad en el despliegue de aplicaciones complejas.</li>
-                    </ul>
-                </section>
-                <section>
-                    <p>"En mi compu si corre pero en el servidor no 😩😭🤬"</p>
-                </section>
-            </section>
+      <p style="font-size:1.1rem;color:rgba(255,255,255,0.82);max-width:600px;margin:0 auto 1.8rem;line-height:1.7;">
+        Docker es una plataforma de contenerización que permite empaquetar aplicaciones junto con todas sus dependencias en unidades portables y reproducibles. El mismo contenedor corre de forma idéntica en cualquier máquina — sin importar el sistema operativo o el entorno.
+      </p>
 
-            <!-- Componentes de Docker -->
-            <section>
-                <section>
-                    <h2>Componentes</h2>
-                </section>
-            
-                <section>
-                    <h3>Docker Engine</h3>
-                    <p>Es el núcleo de Docker, responsable de crear y ejecutar contenedores.</p>
-                </section>
-                <section>
-                    <ul>
-                        <li>Daemon</li>
-                        <li>API</li>
-                        <li>CLI</li>
-                    </ul>
-                </section>
-                <section>
-                    <img src="./assets/engine.png" class="card-img-top img-fluid" alt="CSS">
-                </section>
+      <div style="display:flex;gap:0.6rem;justify-content:center;flex-wrap:wrap;margin-bottom:2.2rem;">
+        <span class="tag" style="background:rgba(255,255,255,0.12);color:white;border-color:rgba(255,255,255,0.2);">
+          <i class="fa-brands fa-docker"></i> Docker Engine
+        </span>
+        <span class="tag" style="background:rgba(255,255,255,0.12);color:white;border-color:rgba(255,255,255,0.2);">
+          <i class="fa-solid fa-layer-group"></i> Imágenes &amp; Contenedores
+        </span>
+        <span class="tag" style="background:rgba(255,255,255,0.12);color:white;border-color:rgba(255,255,255,0.2);">
+          <i class="fa-solid fa-file-code"></i> Dockerfile
+        </span>
+        <span class="tag" style="background:rgba(255,255,255,0.12);color:white;border-color:rgba(255,255,255,0.2);">
+          <i class="fa-solid fa-cubes"></i> Docker Compose
+        </span>
+      </div>
 
-                <section>
-                    <h3>Dockerfile</h3>
-                    <p>Archivo de texto que contiene instrucciones para crear una imagen.</p>
-                </section>
-                <section>
-                    <ul>
-                        <li>Define el entorno de la aplicación.</li>
-                        <li>Especifica dependencias y configuraciones.</li>
-                    </ul>
-                </section>
-                <section>
-                    <h3>Ejemplo:</h3>
-                    <pre><code>FROM node:14
+      <!-- CTA buttons -->
+      <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+        <a href="presentation.html"
+           target="_blank"
+           style="display:inline-flex;align-items:center;gap:0.55rem;background:white;color:#0a3080;font-family:'Montserrat',sans-serif;font-weight:700;font-size:0.95rem;padding:0.75rem 1.6rem;border-radius:10px;text-decoration:none;box-shadow:0 4px 16px rgba(0,0,0,0.2);transition:opacity 0.2s;"
+           onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+          <i class="fa-solid fa-person-chalkboard"></i>
+          Ver presentación
+        </a>
+        <a href="https://github.com/menene/docker"
+           target="_blank"
+           style="display:inline-flex;align-items:center;gap:0.55rem;background:rgba(255,255,255,0.12);color:white;font-family:'Montserrat',sans-serif;font-weight:600;font-size:0.95rem;padding:0.75rem 1.6rem;border-radius:10px;text-decoration:none;border:1.5px solid rgba(255,255,255,0.3);transition:background 0.2s;"
+           onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.12)'">
+          <i class="fa-brands fa-github"></i>
+          Ver en GitHub
+        </a>
+      </div>
 
-WORKDIR /app
+    </div>
+  </section>
 
-COPY package*.json ./
+  <!-- ── CONTENT CARDS ── -->
+  <section style="max-width:860px;margin:0 auto;padding:3.5rem 1.5rem;">
 
-RUN npm install
+    <h2 style="font-size:1.4rem;font-weight:700;color:#1e293b;margin:0 0 1.8rem;text-align:center;">
+      Temas a tratar
+    </h2>
 
-COPY . .
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1.2rem;margin-bottom:3rem;">
 
-CMD ["node", "index.js"]</code></pre>
-                </section>
-            
-                <section>
-                    <h3>Imágenes</h3>
-                    <p>Archivos inmutables que contienen el entorno de ejecución y la aplicación.</p>
-                    <p>Se crean a partir de un Dockerfile y sirven como plantilla para crear contenedores.</p>
-                </section>
-                <section>
-                    <ul>
-                        <li>Capas: Cada instrucción en el Dockerfile genera una capa en la imagen.</li>
-                    </ul>
-                    <img src="./assets/layers.png" class="card-img-top img-fluid" alt="CSS">
-                </section>
-            
-                <section>
-                    <h3>Contenedores</h3>
-                    <p>Instancias basadas en imágenes.</p>
-                </section>
-                <section>
-                    <ul>
-                        <li>Son ligeros y rápidos porque comparten el núcleo del host.</li>
-                        <li>Cada contenedor es independiente y tiene su propio sistema de archivos.</li>
-                        <li>Persistencia de datos mediante volúmenes.</li>
-                    </ul>
-                </section>
-                <section>
-                    <img src="./assets/flow.png" class="card-img-top img-fluid" alt="CSS">
-                </section>
-            
-                <section>
-                    <h3>Docker Hub</h3>
-                    <p>Repositorio público y privado de imágenes Docker.</p>
-                </section>
-                <section>
-                    <ul>
-                        <li>Almacén centralizado para compartir y descargar imágenes.</li>
-                        <li>Imágenes oficiales</li>
-                        <li>Imágenes de la comunidad</li>
-                    </ul>
-                </section>
-                <section>
-                    <img src="./assets/hub.png" class="card-img-top img-fluid" alt="CSS">
-                </section>
+      <div class="card-hover" style="background:white;border:1px solid #e2e8f0;border-radius:14px;padding:1.4rem;">
+        <div style="font-size:1.6rem;margin-bottom:0.7rem;">📦</div>
+        <h3 style="font-size:0.95rem;font-weight:700;color:#1e293b;margin:0 0 0.4rem;">Contenerización</h3>
+        <p style="font-size:0.82rem;color:#64748b;margin:0;line-height:1.6;">Qué es, por qué importa y cómo se compara con las máquinas virtuales.</p>
+      </div>
 
-                <section>
-                    <h1>🤓</h1>
-                    <h2>Demos</h2>
-                </section>
+      <div class="card-hover" style="background:white;border:1px solid #e2e8f0;border-radius:14px;padding:1.4rem;">
+        <div style="font-size:1.6rem;margin-bottom:0.7rem;">🏗️</div>
+        <h3 style="font-size:0.95rem;font-weight:700;color:#1e293b;margin:0 0 0.4rem;">Arquitectura Docker</h3>
+        <p style="font-size:0.82rem;color:#64748b;margin:0;line-height:1.6;">Client → Daemon → containerd → shim → runc, capa por capa.</p>
+      </div>
 
-                <section>
-                    <h3>Docker Compose</h3>
-                    <p>Herramienta para definir y ejecutar aplicaciones multi-contenedor.</p>
-                </section>
-                <section>
-                    <ul>
-                        <li>Usa un archivo docker-compose.yml para configurar servicios.</li>
-                        <li>Múltiples contenedores, <b>un solo comando</b>.</li>
-                        <li>Comparte la red.</li>
-                    </ul>
-                </section>
-                <section >
-                    <h3>Ejemplo:</h3>
-                    <pre>
-                <code>
-services:
-    nginx:
-    image: nginx:latest
-    container_name: my-nginx
-    ports:
-        - "8080:80"
-                </code>
-                    </pre>
-                </section>
-            </section>
+      <div class="card-hover" style="background:white;border:1px solid #e2e8f0;border-radius:14px;padding:1.4rem;">
+        <div style="font-size:1.6rem;margin-bottom:0.7rem;">📄</div>
+        <h3 style="font-size:0.95rem;font-weight:700;color:#1e293b;margin:0 0 0.4rem;">Dockerfile</h3>
+        <p style="font-size:0.82rem;color:#64748b;margin:0;line-height:1.6;">Instrucción a instrucción: FROM, WORKDIR, COPY, RUN, CMD.</p>
+      </div>
 
-            <!-- Puertos -->
-            <section>
-                <section>
-                    <h2>Puertos</h2>
-                </section>
-                <section>
-                    <p>Los contenedores en Docker funcionan en una red interna aislada.</p>
-                    <p>Para que el host pueda acceder a los servicios dentro del contenedor, es necesario <b>mapear</b> los puertos.</p>
-                </section>
-                <section>
-                    <p>Podemos mapear cuantos puertos necesite nuestra aplicación.</p>
-                    <p>Brindan un punto de acceso desde el <b>Host</b> hacia el <b>Contenedor</b></p>
-                </section>
-                <section>
-                    <ul>
-                        <li>El puerto 8080 se enlaza al 80 (HTTP).</li>
-                        <li>El puerto 8443 se enlaza al 443 (HTTPS).</li>
-                    </ul>
-                </section>
-                <section>
-                    <h3>Importante</h3>
-                    <ul>
-                        <li>El puerto del host debe estar libre antes de asignarlo.</li>
-                        <li>Los puertos en uso no pueden ser mapeados nuevamente.</li>
-                    </ul>
-                </section>
-            </section>
+      <div class="card-hover" style="background:white;border:1px solid #e2e8f0;border-radius:14px;padding:1.4rem;">
+        <div style="font-size:1.6rem;margin-bottom:0.7rem;">🔌</div>
+        <h3 style="font-size:0.95rem;font-weight:700;color:#1e293b;margin:0 0 0.4rem;">Puertos y Volúmenes</h3>
+        <p style="font-size:0.82rem;color:#64748b;margin:0;line-height:1.6;">Cómo comunicarse con un contenedor y montar archivos del host.</p>
+      </div>
 
-            <!-- Volúmenes -->
-            <section>
-                <section>
-                    <h2>Volúmenes</h2>
-                </section>
-                <section>
-                    <p>Los volúmenes en Docker permiten almacenar datos de manera persistente fuera del contenedor.</p>
-                    <p>Esto asegura que los datos no se pierdan si el contenedor se elimina.</p>
-                </section>
-                <section>
-                    <h3>Tipos</h3>
-                    <ul>
-                        <li><strong>Con Nombre:</strong> Administrados por Docker.</li>
-                        <li><strong>Enlaces (Bind Mounts):</strong> Se conecta un directorio del host al contenedor.</li>
-                    </ul>
-                </section>
-                <section>
-                    <h3>¿Cuándo usar volúmenes?</h3>
-                    <ul>
-                        <li>Almacenar datos que necesitan persistentes (eliminamos contenedor).</li>
-                        <li>Compartir archivos entre múltiples contenedores.</li>
-                    </ul>
-                </section>
-            </section>
-            
+      <div class="card-hover" style="background:white;border:1px solid #e2e8f0;border-radius:14px;padding:1.4rem;">
+        <div style="font-size:1.6rem;margin-bottom:0.7rem;">🐙</div>
+        <h3 style="font-size:0.95rem;font-weight:700;color:#1e293b;margin:0 0 0.4rem;">Docker Compose</h3>
+        <p style="font-size:0.82rem;color:#64748b;margin:0;line-height:1.6;">Orquestar múltiples contenedores con un solo archivo declarativo.</p>
+      </div>
 
-            <!-- Redes -->
-            <section>
-                <section>
-                    <h2>Redes</h2>
-                </section>
-                <section>
-                    <p>Las redes en Docker permiten que los contenedores se comuniquen entre sí y con el host.</p>
-                </section>
-            </section>
+      <div class="card-hover" style="background:white;border:1px solid #e2e8f0;border-radius:14px;padding:1.4rem;">
+        <div style="font-size:1.6rem;margin-bottom:0.7rem;">⚽</div>
+        <h3 style="font-size:0.95rem;font-weight:700;color:#1e293b;margin:0 0 0.4rem;">Multicontenedor</h3>
+        <p style="font-size:0.82rem;color:#64748b;margin:0;line-height:1.6;">React · FastAPI · SQLite · Docker Compose</p>
+      </div>
 
-            <!-- Demo -->
-            <section>
-                <img src="./assets/morphing_time.jpeg" class="card-img-top img-fluid" alt="CSS" width="30%">
-                <h2>It's Demo Time</h2>
-            </section>
-            
-            <!-- Resumen -->
-            <section>
-                <section><h2>Resumen</h2></section>
-                <section>
-                    <p>Docker permite el despliegue ágil y la gestión eficiente de aplicaciones en contenedores.</p>
-                    <p>Mejora la portabilidad.</p>
-                    <p>Nos hace la vida más fácil.</p>
-                </section>
-                <section>
-                    <h1>¡Aprendan Docker!</h1>
-                </section>
-            </section>
-
-            <!-- Dudas -->
-            <section>
-                <h1>🙋🏽🙋🏼‍♀️</h1>
-                <h2>¿Dudas?</h2>
-            </section>
-        </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.js"></script>
-    <script>
-        Reveal.initialize();
-    </script>
+    <!-- ── EXAMPLES ROW ── -->
+    <h2 style="font-size:1.4rem;font-weight:700;color:#1e293b;margin:0 0 1.2rem;text-align:center;">
+      Ejemplos
+    </h2>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;margin-bottom:3rem;">
+
+      <a href="https://github.com/menene/cc3062-docker/tree/main/examples/js"
+         target="_blank" class="card-hover"
+         style="background:white;border:1px solid #e2e8f0;border-radius:14px;padding:1.3rem;text-decoration:none;display:flex;align-items:flex-start;gap:1rem;">
+        <div style="background:#fefce8;border-radius:10px;padding:0.6rem;flex-shrink:0;">
+          <i class="fa-brands fa-js" style="color:#ca8a04;font-size:1.4rem;"></i>
+        </div>
+        <div>
+          <p style="font-family:'Montserrat',sans-serif;font-weight:700;color:#1e293b;font-size:0.9rem;margin:0 0 0.2rem;">js</p>
+          <p style="font-size:0.78rem;color:#64748b;margin:0;line-height:1.5;">Node.js · HTTP nativo · sin dependencias</p>
+        </div>
+      </a>
+
+      <a href="https://github.com/menene/cc3062-docker/tree/main/examples/express"
+         target="_blank" class="card-hover"
+         style="background:white;border:1px solid #e2e8f0;border-radius:14px;padding:1.3rem;text-decoration:none;display:flex;align-items:flex-start;gap:1rem;">
+        <div style="background:#f0fdf4;border-radius:10px;padding:0.6rem;flex-shrink:0;">
+          <i class="fa-brands fa-node-js" style="color:#16a34a;font-size:1.4rem;"></i>
+        </div>
+        <div>
+          <p style="font-family:'Montserrat',sans-serif;font-weight:700;color:#1e293b;font-size:0.9rem;margin:0 0 0.2rem;">express</p>
+          <p style="font-size:0.78rem;color:#64748b;margin:0;line-height:1.5;">Node.js · Express</p>
+        </div>
+      </a>
+
+      <a href="https://github.com/menene/cc3062-docker/tree/main/examples/fastapi"
+         target="_blank" class="card-hover"
+         style="background:white;border:1px solid #e2e8f0;border-radius:14px;padding:1.3rem;text-decoration:none;display:flex;align-items:flex-start;gap:1rem;">
+        <div style="background:#fff7ed;border-radius:10px;padding:0.6rem;flex-shrink:0;">
+          <i class="fa-brands fa-python" style="color:#ea580c;font-size:1.4rem;"></i>
+        </div>
+        <div>
+          <p style="font-family:'Montserrat',sans-serif;font-weight:700;color:#1e293b;font-size:0.9rem;margin:0 0 0.2rem;">fastapi</p>
+          <p style="font-size:0.78rem;color:#64748b;margin:0;line-height:1.5;">Python · FastAPI · Uvicorn</p>
+        </div>
+      </a>
+
+      <a href="https://github.com/menene/cc3062-docker/tree/main/examples/multicontainer"
+         target="_blank" class="card-hover"
+         style="background:white;border:1px solid #e2e8f0;border-radius:14px;padding:1.3rem;text-decoration:none;display:flex;align-items:flex-start;gap:1rem;">
+        <div style="background:#eff6ff;border-radius:10px;padding:0.6rem;flex-shrink:0;">
+          <i class="fa-solid fa-cubes" style="color:#2496ED;font-size:1.4rem;"></i>
+        </div>
+        <div>
+          <p style="font-family:'Montserrat',sans-serif;font-weight:700;color:#1e293b;font-size:0.9rem;margin:0 0 0.2rem;">multicontainer</p>
+          <p style="font-size:0.78rem;color:#64748b;margin:0;line-height:1.5;">React · FastAPI · SQLite · Docker Compose</p>
+        </div>
+      </a>
+
+      <a href="https://github.com/menene/cc3062-docker/tree/main/examples/devenv"
+         target="_blank" class="card-hover"
+         style="background:white;border:1px solid #e2e8f0;border-radius:14px;padding:1.3rem;text-decoration:none;display:flex;align-items:flex-start;gap:1rem;">
+        <div style="background:#faf5ff;border-radius:10px;padding:0.6rem;flex-shrink:0;">
+          <i class="fa-solid fa-layer-group" style="color:#7c3aed;font-size:1.4rem;"></i>
+        </div>
+        <div>
+          <p style="font-family:'Montserrat',sans-serif;font-weight:700;color:#1e293b;font-size:0.9rem;margin:0 0 0.2rem;">devenv</p>
+          <p style="font-size:0.78rem;color:#64748b;margin:0;line-height:1.5;">Express · PostgreSQL · Adminer · NGINX</p>
+        </div>
+      </a>
+
+      <a href="https://github.com/menene/cc3062-docker/tree/main/examples/docuwiki"
+         target="_blank" class="card-hover"
+         style="background:white;border:1px solid #e2e8f0;border-radius:14px;padding:1.3rem;text-decoration:none;display:flex;align-items:flex-start;gap:1rem;">
+        <div style="background:#f8fafc;border-radius:10px;padding:0.6rem;flex-shrink:0;">
+          <i class="fa-solid fa-book" style="color:#64748b;font-size:1.4rem;"></i>
+        </div>
+        <div>
+          <p style="font-family:'Montserrat',sans-serif;font-weight:700;color:#1e293b;font-size:0.9rem;margin:0 0 0.2rem;">docuwiki</p>
+          <p style="font-size:0.78rem;color:#64748b;margin:0;line-height:1.5;">DokuWiki · imagen de Docker Hub</p>
+        </div>
+      </a>
+
+      <a href="https://github.com/menene/cc3062-docker/tree/main/examples/libreoffice"
+         target="_blank" class="card-hover"
+         style="background:white;border:1px solid #e2e8f0;border-radius:14px;padding:1.3rem;text-decoration:none;display:flex;align-items:flex-start;gap:1rem;">
+        <div style="background:#eff6ff;border-radius:10px;padding:0.6rem;flex-shrink:0;">
+          <i class="fa-solid fa-file-word" style="color:#2496ED;font-size:1.4rem;"></i>
+        </div>
+        <div>
+          <p style="font-family:'Montserrat',sans-serif;font-weight:700;color:#1e293b;font-size:0.9rem;margin:0 0 0.2rem;">libreoffice</p>
+          <p style="font-size:0.78rem;color:#64748b;margin:0;line-height:1.5;">LibreOffice · imagen de Docker Hub</p>
+        </div>
+      </a>
+
+      <a href="https://github.com/menene/cc3062-docker/tree/main/examples/doom"
+         target="_blank" class="card-hover"
+         style="background:white;border:1px solid #e2e8f0;border-radius:14px;padding:1.3rem;text-decoration:none;display:flex;align-items:flex-start;gap:1rem;">
+        <div style="background:#fef2f2;border-radius:10px;padding:0.6rem;flex-shrink:0;">
+          <i class="fa-solid fa-skull" style="color:#dc2626;font-size:1.4rem;"></i>
+        </div>
+        <div>
+          <p style="font-family:'Montserrat',sans-serif;font-weight:700;color:#1e293b;font-size:0.9rem;margin:0 0 0.2rem;">doom</p>
+          <p style="font-size:0.78rem;color:#64748b;margin:0;line-height:1.5;">DOOM · imagen de Docker Hub</p>
+        </div>
+      </a>
+
+      <a href="https://github.com/menene/cc3062-docker/tree/main/examples/nginx"
+         target="_blank" class="card-hover"
+         style="background:white;border:1px solid #e2e8f0;border-radius:14px;padding:1.3rem;text-decoration:none;display:flex;align-items:flex-start;gap:1rem;">
+        <div style="background:#f0fdf4;border-radius:10px;padding:0.6rem;flex-shrink:0;">
+          <i class="fa-solid fa-globe" style="color:#16a34a;font-size:1.4rem;"></i>
+        </div>
+        <div>
+          <p style="font-family:'Montserrat',sans-serif;font-weight:700;color:#1e293b;font-size:0.9rem;margin:0 0 0.2rem;">nginx</p>
+          <p style="font-size:0.78rem;color:#64748b;margin:0;line-height:1.5;">NGINX · sitio estático · Docker Hub</p>
+        </div>
+      </a>
+
+      <a href="https://github.com/menene/cc3062-docker/tree/main/examples/kali-linux"
+         target="_blank" class="card-hover"
+         style="background:white;border:1px solid #e2e8f0;border-radius:14px;padding:1.3rem;text-decoration:none;display:flex;align-items:flex-start;gap:1rem;">
+        <div style="background:#fef2f2;border-radius:10px;padding:0.6rem;flex-shrink:0;">
+          <i class="fa-solid fa-dragon" style="color:#dc2626;font-size:1.4rem;"></i>
+        </div>
+        <div>
+          <p style="font-family:'Montserrat',sans-serif;font-weight:700;color:#1e293b;font-size:0.9rem;margin:0 0 0.2rem;">kali-linux</p>
+          <p style="font-size:0.78rem;color:#64748b;margin:0;line-height:1.5;">Kali Linux · KasmVNC · LinuxServer.io</p>
+        </div>
+      </a>
+
+      <a href="https://github.com/menene/cc3062-docker/tree/main/examples/jellyfin"
+         target="_blank" class="card-hover"
+         style="background:white;border:1px solid #e2e8f0;border-radius:14px;padding:1.3rem;text-decoration:none;display:flex;align-items:flex-start;gap:1rem;">
+        <div style="background:#faf5ff;border-radius:10px;padding:0.6rem;flex-shrink:0;">
+          <i class="fa-solid fa-film" style="color:#7c3aed;font-size:1.4rem;"></i>
+        </div>
+        <div>
+          <p style="font-family:'Montserrat',sans-serif;font-weight:700;color:#1e293b;font-size:0.9rem;margin:0 0 0.2rem;">jellyfin</p>
+          <p style="font-size:0.78rem;color:#64748b;margin:0;line-height:1.5;">Jellyfin · servidor de medios · LinuxServer.io</p>
+        </div>
+      </a>
+
+      <a href="https://github.com/menene/cc3062-docker/tree/main/examples/bitwarden"
+         target="_blank" class="card-hover"
+         style="background:white;border:1px solid #e2e8f0;border-radius:14px;padding:1.3rem;text-decoration:none;display:flex;align-items:flex-start;gap:1rem;">
+        <div style="background:#eff6ff;border-radius:10px;padding:0.6rem;flex-shrink:0;">
+          <i class="fa-solid fa-key" style="color:#2496ED;font-size:1.4rem;"></i>
+        </div>
+        <div>
+          <p style="font-family:'Montserrat',sans-serif;font-weight:700;color:#1e293b;font-size:0.9rem;margin:0 0 0.2rem;">bitwarden</p>
+          <p style="font-size:0.78rem;color:#64748b;margin:0;line-height:1.5;">Vaultwarden · gestor de contraseñas · self-hosted</p>
+        </div>
+      </a>
+
+    </div>
+
+    <!-- ── LEGACY BANNER ── -->
+    <div style="background:#fefce8;border:1px solid #fde047;border-radius:14px;padding:1.2rem 1.5rem;display:flex;align-items:center;gap:1rem;">
+      <i class="fa-solid fa-clock-rotate-left" style="color:#ca8a04;font-size:1.3rem;flex-shrink:0;"></i>
+      <div style="flex:1;">
+        <p style="font-family:'Montserrat',sans-serif;font-weight:700;color:#92400e;margin:0 0 0.2rem;font-size:0.9rem;">Versión anterior</p>
+        <p style="font-size:0.8rem;color:#78350f;margin:0;">La primera versión de esta presentación está disponible en la rama <span class="mono" style="background:#fef08a;padding:0.1em 0.4em;border-radius:4px;">v1</span>.</p>
+      </div>
+      <a href="https://github.com/menene/cc3062-docker/tree/v1"
+         target="_blank"
+         style="display:inline-flex;align-items:center;gap:0.4rem;background:#ca8a04;color:white;font-family:'Montserrat',sans-serif;font-weight:600;font-size:0.8rem;padding:0.5rem 1rem;border-radius:8px;text-decoration:none;white-space:nowrap;flex-shrink:0;">
+        <i class="fa-brands fa-github"></i> Ver v1
+      </a>
+    </div>
+
+  </section>
+
+  <!-- ── FOOTER ── -->
+  <footer style="border-top:1px solid #e2e8f0;padding:1.5rem;text-align:center;">
+    <div style="display:flex;align-items:center;justify-content:center;gap:1.5rem;flex-wrap:wrap;">
+      <span style="font-size:0.8rem;color:#94a3b8;">
+        <i class="fa-solid fa-calendar-days" style="margin-right:0.3em;"></i>Última actualización: marzo 2026
+      </span>
+      <span style="color:#e2e8f0;">|</span>
+      <span style="font-size:0.8rem;color:#94a3b8;">
+        <i class="fa-solid fa-user" style="margin-right:0.3em;"></i>Erick Marroquin
+      </span>
+      <span style="color:#e2e8f0;">|</span>
+      <a href="https://github.com/menene/docker"
+         target="_blank"
+         style="font-size:0.8rem;color:#64748b;text-decoration:none;display:inline-flex;align-items:center;gap:0.3em;">
+        <i class="fa-brands fa-github"></i> menene/docker
+      </a>
+    </div>
+  </footer>
+
 </body>
 </html>

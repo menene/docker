@@ -1,0 +1,1602 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docker — CC3062</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Inter:ital,wght@0,300;0,400;0,600;0,700;1,300&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        corePlugins: { preflight: false },
+        theme: {
+          extend: {
+            fontFamily: {
+              heading: ['Montserrat', 'sans-serif'],
+              body: ['Inter', 'sans-serif'],
+              mono: ['Fira Code', 'monospace'],
+            }
+          }
+        }
+      }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/theme/white.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/plugin/highlight/atom-one-light.min.css">
+    <style>
+        :root {
+            --r-main-font-size: 30px;
+            --db: #2560FF;   /* docker blue */
+            --dc: #0369a1;   /* docker cyan → darker for white bg */
+            --dk: #ffffff;   /* bg */
+            --dg: #f8fafc;   /* gray bg */
+            --card: #f0f4f8;
+            --txt: #1e293b;
+            --mut: #64748b;
+            --grn: #16a34a;
+            --org: #ea580c;
+            --red: #dc2626;
+            --pur: #7c3aed;
+        }
+
+        .reveal-viewport { background: var(--dk); }
+
+        .reveal {
+            font-family: 'Inter', sans-serif;
+            color: var(--txt);
+        }
+
+        .reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+            font-family: 'Montserrat', sans-serif;
+            text-transform: none;
+            letter-spacing: 0.01em;
+        }
+        .reveal h1 { color: var(--db); }
+        .reveal h2 { color: var(--db); font-size: 1.4em; }
+        .reveal h3 { color: var(--db); font-size: 1.1em; }
+
+        .reveal code { font-family: 'Fira Code', monospace; }
+        .reveal pre { border-radius: 10px; box-shadow: 0 2px 16px rgba(0,0,0,0.1); border: 1px solid rgba(36,150,237,0.25); overflow: hidden; max-height: none; }
+        .reveal pre code { font-size: 0.78em; line-height: 1.5; }
+
+        /* ── Pros / Cons lists ── */
+        .reveal ul.pros, .reveal ul.cons {
+            list-style: none; text-align: left; padding: 0;
+        }
+        .reveal ul.pros li::before { content: '✓  '; color: var(--grn); }
+        .reveal ul.cons li::before { content: '✗  '; color: var(--red); }
+        .reveal ul.pros li, .reveal ul.cons li { margin: 0.4em 0; font-size: 0.82em; }
+
+        /* ── Floating whale animation ── */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-14px); }
+        }
+        .whale { animation: float 3.2s ease-in-out infinite; }
+
+        /* ── Glow pulse ── */
+        @keyframes gpulse {
+            0%, 100% { box-shadow: 0 0 14px rgba(36,150,237,0.2); }
+            50% { box-shadow: 0 0 30px rgba(36,150,237,0.4); }
+        }
+        .glow { animation: gpulse 2.4s ease-in-out infinite; }
+
+        /* Slide layout */
+        .reveal .slides > section,
+        .reveal .slides > section > section {
+            padding: 1.5rem 2rem;
+            text-align: center;
+            display: flex !important;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            box-sizing: border-box;
+        }
+
+        /* Left-aligned blocks stay left inside their container */
+        .reveal .slides .text-left,
+        .reveal .slides [style*="text-align:left"] { text-align: left; }
+        .reveal .slides .grid { width: 100%; }
+
+        /* Fade-up fix */
+        .reveal .fragment.fade-up { transform: translate(0, 28px); }
+
+        /* SVG text defaults */
+        text { font-family: 'Inter', sans-serif; }
+
+        /* qbox pseudo-element */
+        .qbox-inner::before {
+            content: '\201C';
+            font-size: 4em;
+            color: var(--org);
+            opacity: 0.35;
+            position: absolute;
+            top: -0.15em; left: 0.15em;
+            font-family: Georgia, serif;
+            line-height: 1;
+        }
+    </style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- ═══════════════════════════════════════════════════════
+     PORTADA
+════════════════════════════════════════════════════════ -->
+<section>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:0.9rem;">
+        <img src="docker-logo-ocean-blue.png" style="width:600px;margin-bottom:0.5rem;" alt="Docker">
+        <p class="text-[#64748b]" style="font-size:0.82em;margin:0;">
+            Erick Marroquin <br>
+            <i class="fa-brands fa-github" style="margin-right:0.3em;"></i>@menene
+        </p>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     CONTENERIZACIÓN
+════════════════════════════════════════════════════════ -->
+<section>
+    <!-- Intro -->
+    <section>
+        <div class="inline-block px-3 py-0.5 rounded-full text-xs font-mono border border-blue-400/50 bg-blue-500/10 text-[#0369a1] tracking-widest mb-2">Contexto</div>
+        <h2>Contenerización</h2>
+    </section>
+
+    <!-- Definition -->
+    <section>
+        <p style="margin:0;">Proceso de empaquetar una aplicación junto con todas sus dependencias en una unidad estandarizada llamada contenedor.</p>
+        <div class="grid grid-cols-2 gap-4 items-start" style="margin-top:1.3rem;">
+            <div class="bg-[#f0f4f8] border border-blue-200 rounded-xl p-4 fragment fade-up" style="text-align:center;">
+                <div style="font-size:1.8em;margin-bottom:0.4em;">📦</div>
+                <strong>Empaquetado</strong>
+                <p class="text-[#64748b]" style="font-size:0.75em;margin:0.3em 0 0;">App + dependencias + config</p>
+            </div>
+            <div class="bg-[#f0f4f8] border border-blue-200 rounded-xl p-4 fragment fade-up" style="text-align:center;">
+                <div style="font-size:1.8em;margin-bottom:0.4em;">🔄</div>
+                <strong>Consistencia</strong>
+                <p class="text-[#64748b]" style="font-size:0.75em;margin:0.3em 0 0;">Funciona igual en cualquier entorno</p>
+            </div>
+        </div>
+        <p class="fragment" style="margin-top:1.1rem;font-size:0.82em;color:#64748b;">
+            ⚡ Comparte el kernel del sistema operativo host — mucho más ligero que una VM
+        </p>
+    </section>
+
+    <!-- VM vs Container diagram -->
+    <section>
+        <h3>VMs vs Contenedores</h3>
+        <svg viewBox="0 0 700 310" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:800px;">
+            <!-- ── VM Side ── -->
+            <text x="160" y="22" text-anchor="middle" font-family="Montserrat" font-size="15" fill="#dc2626">Máquina Virtual</text>
+
+            <!-- Apps row -->
+            <rect x="25"  y="35" width="80" height="38" rx="5" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1.5"/>
+            <text x="65"  y="58" text-anchor="middle" font-size="11" fill="#1e293b">App A</text>
+            <rect x="115" y="35" width="80" height="38" rx="5" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1.5"/>
+            <text x="155" y="58" text-anchor="middle" font-size="11" fill="#1e293b">App B</text>
+            <rect x="205" y="35" width="80" height="38" rx="5" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1.5"/>
+            <text x="245" y="58" text-anchor="middle" font-size="11" fill="#1e293b">App C</text>
+
+            <!-- Guest OS -->
+            <rect x="25"  y="81" width="80" height="34" rx="4" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+            <text x="65"  y="103" text-anchor="middle" font-size="10" fill="#92400e">Guest OS</text>
+            <rect x="115" y="81" width="80" height="34" rx="4" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+            <text x="155" y="103" text-anchor="middle" font-size="10" fill="#92400e">Guest OS</text>
+            <rect x="205" y="81" width="80" height="34" rx="4" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+            <text x="245" y="103" text-anchor="middle" font-size="10" fill="#92400e">Guest OS</text>
+
+            <!-- Hypervisor -->
+            <rect x="25" y="123" width="260" height="34" rx="4" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
+            <text x="155" y="145" text-anchor="middle" font-size="12" fill="#5b21b6">Hypervisor</text>
+
+            <!-- Host OS VM -->
+            <rect x="25" y="165" width="260" height="34" rx="4" fill="#dbeafe" stroke="#2496ED" stroke-width="1.5"/>
+            <text x="155" y="187" text-anchor="middle" font-size="12" fill="#1e40af">Host OS</text>
+
+            <!-- Hardware VM -->
+            <rect x="25" y="207" width="260" height="34" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.5"/>
+            <text x="155" y="229" text-anchor="middle" font-size="12" fill="#475569">Hardware</text>
+
+            <!-- VM annotation -->
+            <line x1="295" y1="35" x2="295" y2="241" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="4,3"/>
+            <text x="303" y="145" font-size="10" fill="#dc2626">GBs cada</text>
+            <text x="303" y="158" font-size="10" fill="#dc2626">una  🐢</text>
+
+            <!-- ── Divider ── -->
+            <line x1="360" y1="15" x2="360" y2="265" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="7,5"/>
+
+            <!-- ── Container Side ── -->
+            <text x="540" y="22" text-anchor="middle" font-family="Montserrat" font-size="15" fill="#16a34a">Contenedores</text>
+
+            <!-- Apps -->
+            <rect x="385" y="35" width="80" height="38" rx="5" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1.5"/>
+            <text x="425" y="58" text-anchor="middle" font-size="11" fill="#1e293b">App A</text>
+            <rect x="475" y="35" width="80" height="38" rx="5" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1.5"/>
+            <text x="515" y="58" text-anchor="middle" font-size="11" fill="#1e293b">App B</text>
+            <rect x="565" y="35" width="80" height="38" rx="5" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1.5"/>
+            <text x="605" y="58" text-anchor="middle" font-size="11" fill="#1e293b">App C</text>
+
+            <!-- Docker Engine -->
+            <rect x="385" y="81" width="260" height="34" rx="4" fill="#dbeafe" stroke="#2496ED" stroke-width="2"/>
+            <text x="515" y="103" text-anchor="middle" font-size="12" fill="#1e40af">Containerization Engine</text>
+
+            <!-- Shared Host OS -->
+            <rect x="385" y="123" width="260" height="34" rx="4" fill="#dbeafe" stroke="#2496ED" stroke-width="1.5"/>
+            <text x="515" y="145" text-anchor="middle" font-size="12" fill="#1e40af">Host OS  (kernel compartido)</text>
+
+            <!-- Hardware Container -->
+            <rect x="385" y="165" width="260" height="34" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.5"/>
+            <text x="515" y="187" text-anchor="middle" font-size="12" fill="#475569">Hardware</text>
+
+            <!-- Container annotation -->
+            <line x1="655" y1="35" x2="655" y2="200" stroke="#16a34a" stroke-width="1.5" stroke-dasharray="4,3"/>
+            <text x="663" y="115" font-size="10" fill="#16a34a">MBs ⚡</text>
+            <text x="663" y="128" font-size="10" fill="#16a34a">rápido</text>
+
+            <!-- Labels bottom -->
+            <text x="155" y="282" text-anchor="middle" font-size="11" fill="#64748b">Pesado · Completo · Aislado</text>
+            <text x="515" y="282" text-anchor="middle" font-size="11" fill="#64748b">Ligero · Rápido · Portable</text>
+        </svg>
+    </section>
+
+    <!-- Pros / Cons -->
+    <section>
+        <h3>Ventajas y Desventajas</h3>
+        <div class="grid grid-cols-2 gap-4 items-start">
+            <div class="bg-[#f0f4f8] border border-blue-200 rounded-xl p-4 fragment">
+                <h4 class="text-[#16a34a]" style="margin:0 0 0.7em;font-size:0.85em;font-family:'Fira Code';">Ventajas</h4>
+                <ul class="pros">
+                    <li>Portabilidad total</li>
+                    <li>Reproducibilidad</li>
+                    <li>Aislamiento eficiente</li>
+                    <li>Arranque rápido</li>
+                    <li>Escalabilidad</li>
+                </ul>
+            </div>
+            <div class="bg-[#f0f4f8] border border-blue-200 rounded-xl p-4 fragment">
+                <h4 class="text-[#dc2626]" style="margin:0 0 0.7em;font-size:0.85em;font-family:'Fira Code';">Desventajas</h4>
+                <ul class="cons">
+                    <li>Complejidad inicial</li>
+                    <li>Riesgos de seguridad</li>
+                    <li>Almacenamiento persistente</li>
+                    <li>Depuración compleja</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>Conceptos Importantes</h2>
+        <div class="grid grid-cols-2 gap-4 items-start">
+            <div class="bg-[#f0f4f8] border border-blue-200 rounded-xl p-4" style="text-align:center;">
+                <div style="font-size:2.2em;margin-bottom:0.4em;">🖥️</div>
+                <strong class="text-[#2496ED]" style="font-family:'Montserrat';font-size:0.9em;">Host</strong>
+                <p class="text-[#64748b]" style="font-size:0.78em;margin:0.5em 0 0;">La máquina física donde Docker corre.</p>
+            </div>
+            <div class="bg-[#f0f4f8] border border-blue-200 rounded-xl p-4" style="text-align:center;border-color:rgba(74,222,128,0.3);">
+                <div style="font-size:2.2em;margin-bottom:0.4em;">📦</div>
+                <strong class="text-[#16a34a]" style="font-family:'Montserrat';font-size:0.9em;">Contenedor</strong>
+                <p class="text-[#64748b]" style="font-size:0.78em;margin:0.5em 0 0;">Instancia aislada generada por Docker.</p>
+            </div>
+        </div>
+    </section>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     DOCKER
+════════════════════════════════════════════════════════ -->
+<section>
+    <section>
+        <div class="inline-block px-3 py-0.5 rounded-full text-xs font-mono border border-blue-400/50 bg-blue-500/10 text-[#0369a1] tracking-widest mb-2">Plataforma</div>
+        <h2>Docker</h2>
+    </section>
+
+    <section>
+        <p style="font-size:1.05em;line-height:1.75;">
+            Plataforma de software que utiliza contenedores para crear, desplegar y ejecutar aplicaciones de manera consistente en cualquier entorno.
+        </p>
+        <div style="margin-top:1.4rem;">
+            <h3>Lanzado en 2013 por Docker Inc.</h3>
+        </div>
+    </section>
+
+    <section>
+        <div class="bg-[#f8fafc] border border-orange-300/50 rounded-xl px-8 py-5 italic relative" style="margin-top:1.2rem;font-size:0.85em;">
+            Docker es a la contenerización lo que <em>Klenex</em> es al los pañuelos o Tupper es a los trastos de plástico.
+        </div>
+    </section>
+
+    <section>
+        <h3>El problema que resuelve</h3>
+        <div class="grid grid-cols-3 gap-3">
+            <div class="bg-[#f0f4f8] border fragment border-blue-200 rounded-xl p-4" style="font-size:0.78em;text-align:center;">
+                <div style="font-size:1.7em;">⚔️</div>
+                <p style="margin:0.3em 0 0;">Conflictos de<br>dependencias</p>
+            </div>
+            <div class="bg-[#f0f4f8] border fragment border-blue-200 rounded-xl p-4" style="font-size:0.78em;text-align:center;">
+                <div style="font-size:1.7em;">🌍</div>
+                <p style="margin:0.3em 0 0;">Incompatibilidad<br>entre entornos</p>
+            </div>
+            <div class="bg-[#f0f4f8] border fragment border-blue-200 rounded-xl p-4" style="font-size:0.78em;text-align:center;">
+                <div style="font-size:1.7em;">🚀</div>
+                <p style="margin:0.3em 0 0;">Despliegue<br>complejo</p>
+            </div>
+        </div>
+        <br>
+        <h4 class="fragment">
+            "En mi compu sí corre, pero en el servidor no 😩😭🤬"
+        </h4>
+    </section>
+
+    <section>
+        <h3>¿Por qué elegir Docker?</h3>
+        <div class="grid grid-cols-2 gap-4 items-start" style="align-items:start;">
+            <ul style="font-size:0.84em;list-style:none;padding:0;text-align:left;">
+                <li class="fragment" style="padding:0.55em 0;border-bottom:1px solid rgba(255,255,255,0.06);">📚 Amplio ecosistema y documentación</li>
+                <li class="fragment" style="padding:0.55em 0;border-bottom:1px solid rgba(255,255,255,0.06);">🔗 Integración nativa con Kubernetes</li>
+                <li class="fragment" style="padding:0.55em 0;border-bottom:1px solid rgba(255,255,255,0.06);">👨‍💻 Fácil para devs y DevOps</li>
+                <li class="fragment" style="padding:0.55em 0;">🧘 Paz mental</li>
+            </ul>
+            <div class="bg-[#f0f4f8] border border-blue-200 rounded-xl p-4 fragment">
+                <p class="text-[#64748b]" style="margin:0 0 0.75em;font-size:0.72em;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;">Alternativas</p>
+                <div style="display:flex;align-items:center;gap:0.75em;padding:0.45em 0;border-bottom:1px solid rgba(0,0,0,0.07);">
+                    <img src="https://cdn.simpleicons.org/podman/892CA0" style="width:38px;height:38px;object-fit:contain;flex-shrink:0;" alt="Podman">
+                    <div style="text-align:left;">
+                        <strong style="font-size:0.82em;">Podman</strong>
+                        <span class="text-[#64748b]" style="font-size:0.72em;display:block;">sin daemon · rootless</span>
+                    </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:0.75em;padding:0.45em 0;border-bottom:1px solid rgba(0,0,0,0.07);">
+                    <img src="https://cdn.simpleicons.org/rkt/0069A5" style="width:38px;height:38px;object-fit:contain;flex-shrink:0;" alt="rkt">
+                    <div style="text-align:left;">
+                        <strong style="font-size:0.82em;">rkt</strong>
+                        <span class="text-[#64748b]" style="font-size:0.72em;display:block;">CoreOS · discontinuado</span>
+                    </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:0.75em;padding:0.45em 0;">
+                    <img src="https://cdn.simpleicons.org/linuxcontainers/333333" style="width:38px;height:38px;object-fit:contain;flex-shrink:0;" alt="LXC">
+                    <div style="text-align:left;">
+                        <strong style="font-size:0.82em;">LXC</strong>
+                        <span class="text-[#64748b]" style="font-size:0.72em;display:block;">Linux lightweight</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     ARQUITECTURA
+════════════════════════════════════════════════════════ -->
+<section>
+
+    <!-- Title + full overview -->
+    <section>
+        <div class="inline-block px-3 py-0.5 rounded-full text-xs font-mono border border-blue-400/50 bg-blue-500/10 text-[#0369a1] tracking-widest mb-2">Arquitectura</div>
+        <h2>Docker Engine</h2>
+    </section>
+
+    <section>
+        <svg viewBox="0 0 680 320" style="width:96%;margin-top:0.6rem;">
+            <defs>
+                <marker id="aa" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+                    <path d="M0,0 L0,6 L7,3 z" fill="#94a3b8"/>
+                </marker>
+            </defs>
+            <!-- Left: hierarchy -->
+            <!-- Docker Client -->
+            <rect x="80" y="12" width="160" height="36" rx="8" fill="#2496ED"/>
+            <text x="160" y="35" text-anchor="middle" font-family="Fira Code" font-size="13" fill="white">$ docker client</text>
+            <!-- arrow -->
+            <line x1="160" y1="50" x2="160" y2="66" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#aa)"/>
+            <!-- Docker Daemon -->
+            <rect x="65" y="68" width="190" height="36" rx="8" fill="white" stroke="#2496ED" stroke-width="2"/>
+            <text x="160" y="91" text-anchor="middle" font-family="Fira Code" font-size="13" fill="#1e293b">Docker daemon</text>
+            <!-- arrow -->
+            <line x1="160" y1="106" x2="160" y2="122" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#aa)"/>
+            <!-- containerd -->
+            <rect x="65" y="124" width="190" height="36" rx="8" fill="white" stroke="#2496ED" stroke-width="2"/>
+            <text x="160" y="147" text-anchor="middle" font-family="Fira Code" font-size="13" fill="#1e293b">containerd</text>
+            <!-- 4 branching arrows to shims -->
+            <line x1="105" y1="162" x2="55" y2="180" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#aa)"/>
+            <line x1="135" y1="162" x2="115" y2="180" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#aa)"/>
+            <line x1="185" y1="162" x2="205" y2="180" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#aa)"/>
+            <line x1="215" y1="162" x2="265" y2="180" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#aa)"/>
+            <!-- shim x4 -->
+            <rect x="20" y="182" width="52" height="26" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3"/>
+            <text x="46" y="200" text-anchor="middle" font-size="11" fill="#475569">shim</text>
+            <rect x="88" y="182" width="52" height="26" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3"/>
+            <text x="114" y="200" text-anchor="middle" font-size="11" fill="#475569">shim</text>
+            <rect x="178" y="182" width="52" height="26" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3"/>
+            <text x="204" y="200" text-anchor="middle" font-size="11" fill="#475569">shim</text>
+            <rect x="246" y="182" width="52" height="26" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3"/>
+            <text x="272" y="200" text-anchor="middle" font-size="11" fill="#475569">shim</text>
+            <!-- runc x4 -->
+            <rect x="20" y="218" width="52" height="26" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3"/>
+            <text x="46" y="236" text-anchor="middle" font-size="11" fill="#475569">runc</text>
+            <rect x="88" y="218" width="52" height="26" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3"/>
+            <text x="114" y="236" text-anchor="middle" font-size="11" fill="#475569">runc</text>
+            <rect x="178" y="218" width="52" height="26" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3"/>
+            <text x="204" y="236" text-anchor="middle" font-size="11" fill="#475569">runc</text>
+            <rect x="246" y="218" width="52" height="26" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3"/>
+            <text x="272" y="236" text-anchor="middle" font-size="11" fill="#475569">runc</text>
+            <!-- containers x4 (blue striped) -->
+            <rect x="20" y="254" width="52" height="36" rx="3" fill="#2496ED" opacity="0.85"/>
+            <line x1="28" y1="254" x2="28" y2="290" stroke="white" stroke-width="1" opacity="0.4"/>
+            <line x1="36" y1="254" x2="36" y2="290" stroke="white" stroke-width="1" opacity="0.4"/>
+            <line x1="44" y1="254" x2="44" y2="290" stroke="white" stroke-width="1" opacity="0.4"/>
+            <line x1="52" y1="254" x2="52" y2="290" stroke="white" stroke-width="1" opacity="0.4"/>
+            <line x1="60" y1="254" x2="60" y2="290" stroke="white" stroke-width="1" opacity="0.4"/>
+            <rect x="88" y="254" width="52" height="36" rx="3" fill="#2496ED" opacity="0.85"/>
+            <line x1="96" y1="254" x2="96" y2="290" stroke="white" stroke-width="1" opacity="0.4"/>
+            <line x1="104" y1="254" x2="104" y2="290" stroke="white" stroke-width="1" opacity="0.4"/>
+            <line x1="112" y1="254" x2="112" y2="290" stroke="white" stroke-width="1" opacity="0.4"/>
+            <line x1="120" y1="254" x2="120" y2="290" stroke="white" stroke-width="1" opacity="0.4"/>
+            <line x1="128" y1="254" x2="128" y2="290" stroke="white" stroke-width="1" opacity="0.4"/>
+            <rect x="178" y="254" width="52" height="36" rx="3" fill="#2496ED" opacity="0.85"/>
+            <line x1="186" y1="254" x2="186" y2="290" stroke="white" stroke-width="1" opacity="0.4"/>
+            <line x1="194" y1="254" x2="194" y2="290" stroke="white" stroke-width="1" opacity="0.4"/>
+            <line x1="202" y1="254" x2="202" y2="290" stroke="white" stroke-width="1" opacity="0.4"/>
+            <line x1="210" y1="254" x2="210" y2="290" stroke="white" stroke-width="1" opacity="0.4"/>
+            <line x1="218" y1="254" x2="218" y2="290" stroke="white" stroke-width="1" opacity="0.4"/>
+            <rect x="246" y="254" width="52" height="36" rx="3" fill="#2496ED" opacity="0.85"/>
+            <line x1="254" y1="254" x2="254" y2="290" stroke="white" stroke-width="1" opacity="0.4"/>
+            <line x1="262" y1="254" x2="262" y2="290" stroke="white" stroke-width="1" opacity="0.4"/>
+            <line x1="270" y1="254" x2="270" y2="290" stroke="white" stroke-width="1" opacity="0.4"/>
+            <line x1="278" y1="254" x2="278" y2="290" stroke="white" stroke-width="1" opacity="0.4"/>
+            <line x1="286" y1="254" x2="286" y2="290" stroke="white" stroke-width="1" opacity="0.4"/>
+            <!-- Right side labels with dashed connectors -->
+            <!-- client label -->
+            <line x1="242" y1="30" x2="380" y2="30" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4,3"/>
+            <text x="386" y="35" font-size="12" fill="#475569">Docker commands (CLI)</text>
+            <!-- daemon label -->
+            <line x1="257" y1="86" x2="380" y2="86" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4,3"/>
+            <text x="386" y="91" font-size="12" fill="#475569">API &amp; other features</text>
+            <!-- containerd label -->
+            <line x1="257" y1="142" x2="380" y2="142" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4,3"/>
+            <text x="386" y="140" font-size="12" fill="#475569">Container lifecycle</text>
+            <text x="386" y="156" font-size="12" fill="#475569">start | stop | pause</text>
+            <!-- shim label -->
+            <line x1="300" y1="195" x2="380" y2="195" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4,3"/>
+            <text x="386" y="200" font-size="12" fill="#475569">Daemonless containers</text>
+            <!-- runc label -->
+            <line x1="300" y1="231" x2="380" y2="231" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4,3"/>
+            <text x="386" y="229" font-size="12" fill="#475569">Container runtime</text>
+            <text x="386" y="245" font-size="12" fill="#475569">(kernel primitives)</text>
+            <!-- containers label -->
+            <line x1="300" y1="272" x2="380" y2="272" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4,3"/>
+            <text x="386" y="277" font-size="12" fill="#475569">Running containers</text>
+        </svg>
+    </section>
+
+    <!-- Line-by-line: Docker Client -->
+    <section data-auto-animate>
+        <div class="grid grid-cols-2 gap-4 items-start" style="align-items:center;gap:1.5rem;">
+            <svg viewBox="0 0 300 310" style="width:240px;">
+                <defs><marker id="aa2" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#94a3b8"/></marker></defs>
+                <!-- Docker Client HIGHLIGHTED -->
+                <rect x="75" y="12" width="150" height="36" rx="8" fill="#2496ED"/>
+                <text x="150" y="35" text-anchor="middle" font-family="Fira Code" font-size="13" fill="white">$ docker client</text>
+                <line x1="150" y1="50" x2="150" y2="66" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#aa2)"/>
+                <!-- Rest dimmed -->
+                <g opacity="0.18">
+                    <rect x="60" y="68" width="180" height="36" rx="8" fill="white" stroke="#2496ED" stroke-width="2"/>
+                    <text x="150" y="91" text-anchor="middle" font-family="Fira Code" font-size="13" fill="#1e293b">Docker daemon</text>
+                    <line x1="150" y1="106" x2="150" y2="122" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#aa2)"/>
+                    <rect x="60" y="124" width="180" height="36" rx="8" fill="white" stroke="#2496ED" stroke-width="2"/>
+                    <text x="150" y="147" text-anchor="middle" font-family="Fira Code" font-size="13" fill="#1e293b">containerd</text>
+                    <line x1="95" y1="162" x2="45" y2="180" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#aa2)"/>
+                    <line x1="125" y1="162" x2="110" y2="180" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#aa2)"/>
+                    <line x1="175" y1="162" x2="190" y2="180" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#aa2)"/>
+                    <line x1="205" y1="162" x2="255" y2="180" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#aa2)"/>
+                    <rect x="15" y="182" width="50" height="26" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3"/><text x="40" y="200" text-anchor="middle" font-size="11" fill="#475569">shim</text>
+                    <rect x="82" y="182" width="50" height="26" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3"/><text x="107" y="200" text-anchor="middle" font-size="11" fill="#475569">shim</text>
+                    <rect x="168" y="182" width="50" height="26" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3"/><text x="193" y="200" text-anchor="middle" font-size="11" fill="#475569">shim</text>
+                    <rect x="235" y="182" width="50" height="26" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3"/><text x="260" y="200" text-anchor="middle" font-size="11" fill="#475569">shim</text>
+                    <rect x="15" y="218" width="50" height="26" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3"/><text x="40" y="236" text-anchor="middle" font-size="11" fill="#475569">runc</text>
+                    <rect x="82" y="218" width="50" height="26" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3"/><text x="107" y="236" text-anchor="middle" font-size="11" fill="#475569">runc</text>
+                    <rect x="168" y="218" width="50" height="26" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3"/><text x="193" y="236" text-anchor="middle" font-size="11" fill="#475569">runc</text>
+                    <rect x="235" y="218" width="50" height="26" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3"/><text x="260" y="236" text-anchor="middle" font-size="11" fill="#475569">runc</text>
+                    <rect x="15" y="254" width="50" height="36" rx="3" fill="#2496ED"/><rect x="82" y="254" width="50" height="36" rx="3" fill="#2496ED"/><rect x="168" y="254" width="50" height="36" rx="3" fill="#2496ED"/><rect x="235" y="254" width="50" height="36" rx="3" fill="#2496ED"/>
+                </g>
+            </svg>
+            <div class="bg-[#f0f4f8] border border-blue-200 rounded-xl p-4" style="border-color:rgba(36,150,237,0.6);text-align:left;">
+                <code class="text-[#2496ED]" style="font-size:0.95em;">$ docker client</code>
+                <p style="font-size:0.78em;margin:0.6em 0 0;">El punto de entrada del usuario. Traduce comandos como <code>docker run</code> o <code>docker build</code> en llamadas a la API del daemon. Puede ser local o remoto.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Line-by-line: Docker Daemon -->
+    <section data-auto-animate>
+        <div class="grid grid-cols-2 gap-4 items-start" style="align-items:center;gap:1.5rem;">
+            <svg viewBox="0 0 300 310" style="width:240px;">
+                <defs><marker id="aa3" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#94a3b8"/></marker></defs>
+                <g opacity="0.18">
+                    <rect x="75" y="12" width="150" height="36" rx="8" fill="#2496ED"/>
+                    <text x="150" y="35" text-anchor="middle" font-family="Fira Code" font-size="13" fill="white">$ docker client</text>
+                </g>
+                <line x1="150" y1="50" x2="150" y2="66" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#aa3)"/>
+                <!-- Docker Daemon HIGHLIGHTED -->
+                <rect x="60" y="68" width="180" height="36" rx="8" fill="white" stroke="#2496ED" stroke-width="2.5"/>
+                <text x="150" y="91" text-anchor="middle" font-family="Fira Code" font-size="13" fill="#1e293b" font-weight="bold">Docker daemon</text>
+                <line x1="150" y1="106" x2="150" y2="122" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#aa3)"/>
+                <g opacity="0.18">
+                    <rect x="60" y="124" width="180" height="36" rx="8" fill="white" stroke="#2496ED" stroke-width="2"/>
+                    <text x="150" y="147" text-anchor="middle" font-family="Fira Code" font-size="13" fill="#1e293b">containerd</text>
+                    <line x1="95" y1="162" x2="45" y2="180" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#aa3)"/>
+                    <line x1="125" y1="162" x2="110" y2="180" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#aa3)"/>
+                    <line x1="175" y1="162" x2="190" y2="180" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#aa3)"/>
+                    <line x1="205" y1="162" x2="255" y2="180" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#aa3)"/>
+                    <rect x="15" y="182" width="50" height="26" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3"/><text x="40" y="200" text-anchor="middle" font-size="11" fill="#475569">shim</text>
+                    <rect x="82" y="182" width="50" height="26" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3"/><text x="107" y="200" text-anchor="middle" font-size="11" fill="#475569">shim</text>
+                    <rect x="168" y="182" width="50" height="26" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3"/><text x="193" y="200" text-anchor="middle" font-size="11" fill="#475569">shim</text>
+                    <rect x="235" y="182" width="50" height="26" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3"/><text x="260" y="200" text-anchor="middle" font-size="11" fill="#475569">shim</text>
+                    <rect x="15" y="218" width="50" height="26" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3"/><text x="40" y="236" text-anchor="middle" font-size="11" fill="#475569">runc</text>
+                    <rect x="82" y="218" width="50" height="26" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3"/><text x="107" y="236" text-anchor="middle" font-size="11" fill="#475569">runc</text>
+                    <rect x="168" y="218" width="50" height="26" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3"/><text x="193" y="236" text-anchor="middle" font-size="11" fill="#475569">runc</text>
+                    <rect x="235" y="218" width="50" height="26" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3"/><text x="260" y="236" text-anchor="middle" font-size="11" fill="#475569">runc</text>
+                    <rect x="15" y="254" width="50" height="36" rx="3" fill="#2496ED"/><rect x="82" y="254" width="50" height="36" rx="3" fill="#2496ED"/><rect x="168" y="254" width="50" height="36" rx="3" fill="#2496ED"/><rect x="235" y="254" width="50" height="36" rx="3" fill="#2496ED"/>
+                </g>
+            </svg>
+            <div class="bg-[#f0f4f8] border border-blue-200 rounded-xl p-4" style="border-color:rgba(3,105,161,0.5);text-align:left;">
+                <code class="text-[#0369a1]" style="font-size:0.95em;">Docker daemon</code>
+                <p style="font-size:0.78em;margin:0.6em 0 0;">Proceso en background (<code>dockerd</code>) que expone la API REST. Recibe instrucciones del cliente y las delega a <code>containerd</code>. Gestiona imágenes, redes y volúmenes.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Line-by-line: containerd -->
+    <section data-auto-animate>
+        <div class="grid grid-cols-2 gap-4 items-start" style="align-items:center;gap:1.5rem;">
+            <svg viewBox="0 0 300 310" style="width:240px;">
+                <defs><marker id="aa4" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#94a3b8"/></marker></defs>
+                <g opacity="0.18">
+                    <rect x="75" y="12" width="150" height="36" rx="8" fill="#2496ED"/>
+                    <text x="150" y="35" text-anchor="middle" font-family="Fira Code" font-size="13" fill="white">$ docker client</text>
+                    <line x1="150" y1="50" x2="150" y2="66" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#aa4)"/>
+                    <rect x="60" y="68" width="180" height="36" rx="8" fill="white" stroke="#2496ED" stroke-width="2"/>
+                    <text x="150" y="91" text-anchor="middle" font-family="Fira Code" font-size="13" fill="#1e293b">Docker daemon</text>
+                </g>
+                <line x1="150" y1="106" x2="150" y2="122" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#aa4)"/>
+                <!-- containerd HIGHLIGHTED -->
+                <rect x="60" y="124" width="180" height="36" rx="8" fill="white" stroke="#2496ED" stroke-width="2.5"/>
+                <text x="150" y="147" text-anchor="middle" font-family="Fira Code" font-size="13" fill="#1e293b" font-weight="bold">containerd</text>
+                <line x1="95" y1="162" x2="45" y2="180" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#aa4)"/>
+                <line x1="125" y1="162" x2="110" y2="180" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#aa4)"/>
+                <line x1="175" y1="162" x2="190" y2="180" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#aa4)"/>
+                <line x1="205" y1="162" x2="255" y2="180" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#aa4)"/>
+                <g opacity="0.18">
+                    <rect x="15" y="182" width="50" height="26" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3"/><text x="40" y="200" text-anchor="middle" font-size="11" fill="#475569">shim</text>
+                    <rect x="82" y="182" width="50" height="26" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3"/><text x="107" y="200" text-anchor="middle" font-size="11" fill="#475569">shim</text>
+                    <rect x="168" y="182" width="50" height="26" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3"/><text x="193" y="200" text-anchor="middle" font-size="11" fill="#475569">shim</text>
+                    <rect x="235" y="182" width="50" height="26" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3"/><text x="260" y="200" text-anchor="middle" font-size="11" fill="#475569">shim</text>
+                    <rect x="15" y="218" width="50" height="26" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3"/><text x="40" y="236" text-anchor="middle" font-size="11" fill="#475569">runc</text>
+                    <rect x="82" y="218" width="50" height="26" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3"/><text x="107" y="236" text-anchor="middle" font-size="11" fill="#475569">runc</text>
+                    <rect x="168" y="218" width="50" height="26" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3"/><text x="193" y="236" text-anchor="middle" font-size="11" fill="#475569">runc</text>
+                    <rect x="235" y="218" width="50" height="26" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3"/><text x="260" y="236" text-anchor="middle" font-size="11" fill="#475569">runc</text>
+                    <rect x="15" y="254" width="50" height="36" rx="3" fill="#2496ED"/><rect x="82" y="254" width="50" height="36" rx="3" fill="#2496ED"/><rect x="168" y="254" width="50" height="36" rx="3" fill="#2496ED"/><rect x="235" y="254" width="50" height="36" rx="3" fill="#2496ED"/>
+                </g>
+            </svg>
+            <div class="bg-[#f0f4f8] border border-blue-200 rounded-xl p-4" style="border-color:rgba(124,58,237,0.5);text-align:left;">
+                <code class="text-[#7c3aed]" style="font-size:0.95em;">containerd</code>
+                <p style="font-size:0.78em;margin:0.6em 0 0;">Runtime de alto nivel. Gestiona el <strong>ciclo de vida</strong> de los contenedores: <code>start | stop | pause | delete</code>. Descarga imágenes y configura almacenamiento. Llama a <code>runc</code> a través de <code>shim</code>.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Line-by-line: shim -->
+    <section data-auto-animate>
+        <div class="grid grid-cols-2 gap-4 items-start" style="align-items:center;gap:1.5rem;">
+            <svg viewBox="0 0 300 310" style="width:240px;">
+                <defs><marker id="aa5" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#94a3b8"/></marker></defs>
+                <g opacity="0.18">
+                    <rect x="75" y="12" width="150" height="36" rx="8" fill="#2496ED"/>
+                    <text x="150" y="35" text-anchor="middle" font-family="Fira Code" font-size="13" fill="white">$ docker client</text>
+                    <line x1="150" y1="50" x2="150" y2="66" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#aa5)"/>
+                    <rect x="60" y="68" width="180" height="36" rx="8" fill="white" stroke="#2496ED" stroke-width="2"/>
+                    <text x="150" y="91" text-anchor="middle" font-family="Fira Code" font-size="13" fill="#1e293b">Docker daemon</text>
+                    <line x1="150" y1="106" x2="150" y2="122" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#aa5)"/>
+                    <rect x="60" y="124" width="180" height="36" rx="8" fill="white" stroke="#2496ED" stroke-width="2"/>
+                    <text x="150" y="147" text-anchor="middle" font-family="Fira Code" font-size="13" fill="#1e293b">containerd</text>
+                </g>
+                <line x1="95" y1="162" x2="45" y2="180" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#aa5)"/>
+                <line x1="125" y1="162" x2="110" y2="180" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#aa5)"/>
+                <line x1="175" y1="162" x2="190" y2="180" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#aa5)"/>
+                <line x1="205" y1="162" x2="255" y2="180" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#aa5)"/>
+                <!-- shims HIGHLIGHTED -->
+                <rect x="15" y="182" width="50" height="26" rx="4" fill="#dbeafe" stroke="#2496ED" stroke-width="2"/><text x="40" y="200" text-anchor="middle" font-size="11" fill="#1e40af" font-weight="bold">shim</text>
+                <rect x="82" y="182" width="50" height="26" rx="4" fill="#dbeafe" stroke="#2496ED" stroke-width="2"/><text x="107" y="200" text-anchor="middle" font-size="11" fill="#1e40af" font-weight="bold">shim</text>
+                <rect x="168" y="182" width="50" height="26" rx="4" fill="#dbeafe" stroke="#2496ED" stroke-width="2"/><text x="193" y="200" text-anchor="middle" font-size="11" fill="#1e40af" font-weight="bold">shim</text>
+                <rect x="235" y="182" width="50" height="26" rx="4" fill="#dbeafe" stroke="#2496ED" stroke-width="2"/><text x="260" y="200" text-anchor="middle" font-size="11" fill="#1e40af" font-weight="bold">shim</text>
+                <g opacity="0.18">
+                    <rect x="15" y="218" width="50" height="26" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3"/><text x="40" y="236" text-anchor="middle" font-size="11" fill="#475569">runc</text>
+                    <rect x="82" y="218" width="50" height="26" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3"/><text x="107" y="236" text-anchor="middle" font-size="11" fill="#475569">runc</text>
+                    <rect x="168" y="218" width="50" height="26" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3"/><text x="193" y="236" text-anchor="middle" font-size="11" fill="#475569">runc</text>
+                    <rect x="235" y="218" width="50" height="26" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3"/><text x="260" y="236" text-anchor="middle" font-size="11" fill="#475569">runc</text>
+                    <rect x="15" y="254" width="50" height="36" rx="3" fill="#2496ED"/><rect x="82" y="254" width="50" height="36" rx="3" fill="#2496ED"/><rect x="168" y="254" width="50" height="36" rx="3" fill="#2496ED"/><rect x="235" y="254" width="50" height="36" rx="3" fill="#2496ED"/>
+                </g>
+            </svg>
+            <div class="bg-[#f0f4f8] border border-blue-200 rounded-xl p-4" style="border-color:rgba(36,150,237,0.6);text-align:left;">
+                <code class="text-[#2496ED]" style="font-size:0.95em;">shim</code>
+                <p style="font-size:0.78em;margin:0.6em 0 0;">Proceso intermediario entre <code>containerd</code> y <code>runc</code>. Permite contenedores <strong>daemonless</strong>: si el daemon se reinicia, los contenedores siguen corriendo. Un shim por contenedor.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Line-by-line: runc -->
+    <section data-auto-animate>
+        <div class="grid grid-cols-2 gap-4 items-start" style="align-items:center;gap:1.5rem;">
+            <svg viewBox="0 0 300 310" style="width:240px;">
+                <defs><marker id="aa6" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#94a3b8"/></marker></defs>
+                <g opacity="0.18">
+                    <rect x="75" y="12" width="150" height="36" rx="8" fill="#2496ED"/>
+                    <text x="150" y="35" text-anchor="middle" font-family="Fira Code" font-size="13" fill="white">$ docker client</text>
+                    <line x1="150" y1="50" x2="150" y2="66" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#aa6)"/>
+                    <rect x="60" y="68" width="180" height="36" rx="8" fill="white" stroke="#2496ED" stroke-width="2"/>
+                    <text x="150" y="91" text-anchor="middle" font-family="Fira Code" font-size="13" fill="#1e293b">Docker daemon</text>
+                    <line x1="150" y1="106" x2="150" y2="122" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#aa6)"/>
+                    <rect x="60" y="124" width="180" height="36" rx="8" fill="white" stroke="#2496ED" stroke-width="2"/>
+                    <text x="150" y="147" text-anchor="middle" font-family="Fira Code" font-size="13" fill="#1e293b">containerd</text>
+                    <line x1="95" y1="162" x2="45" y2="180" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#aa6)"/>
+                    <line x1="125" y1="162" x2="110" y2="180" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#aa6)"/>
+                    <line x1="175" y1="162" x2="190" y2="180" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#aa6)"/>
+                    <line x1="205" y1="162" x2="255" y2="180" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#aa6)"/>
+                    <rect x="15" y="182" width="50" height="26" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3"/><text x="40" y="200" text-anchor="middle" font-size="11" fill="#475569">shim</text>
+                    <rect x="82" y="182" width="50" height="26" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3"/><text x="107" y="200" text-anchor="middle" font-size="11" fill="#475569">shim</text>
+                    <rect x="168" y="182" width="50" height="26" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3"/><text x="193" y="200" text-anchor="middle" font-size="11" fill="#475569">shim</text>
+                    <rect x="235" y="182" width="50" height="26" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3"/><text x="260" y="200" text-anchor="middle" font-size="11" fill="#475569">shim</text>
+                </g>
+                <!-- runc HIGHLIGHTED -->
+                <rect x="15" y="218" width="50" height="26" rx="4" fill="#dbeafe" stroke="#2496ED" stroke-width="2"/><text x="40" y="236" text-anchor="middle" font-size="11" fill="#1e40af" font-weight="bold">runc</text>
+                <rect x="82" y="218" width="50" height="26" rx="4" fill="#dbeafe" stroke="#2496ED" stroke-width="2"/><text x="107" y="236" text-anchor="middle" font-size="11" fill="#1e40af" font-weight="bold">runc</text>
+                <rect x="168" y="218" width="50" height="26" rx="4" fill="#dbeafe" stroke="#2496ED" stroke-width="2"/><text x="193" y="236" text-anchor="middle" font-size="11" fill="#1e40af" font-weight="bold">runc</text>
+                <rect x="235" y="218" width="50" height="26" rx="4" fill="#dbeafe" stroke="#2496ED" stroke-width="2"/><text x="260" y="236" text-anchor="middle" font-size="11" fill="#1e40af" font-weight="bold">runc</text>
+                <g opacity="0.18">
+                    <rect x="15" y="254" width="50" height="36" rx="3" fill="#2496ED"/><rect x="82" y="254" width="50" height="36" rx="3" fill="#2496ED"/><rect x="168" y="254" width="50" height="36" rx="3" fill="#2496ED"/><rect x="235" y="254" width="50" height="36" rx="3" fill="#2496ED"/>
+                </g>
+            </svg>
+            <div class="bg-[#f0f4f8] border border-blue-200 rounded-xl p-4" style="border-color:rgba(22,163,74,0.5);text-align:left;">
+                <code class="text-[#16a34a]" style="font-size:0.95em;">runc</code>
+                <p style="font-size:0.78em;margin:0.6em 0 0;">Runtime de bajo nivel OCI-compliant. Interfaz directa con las <strong>primitivas del kernel</strong>: <code>namespaces</code> y <code>cgroups</code>. Crea el proceso del contenedor y luego termina — el shim lo mantiene vivo.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Line-by-line: Running containers -->
+    <section data-auto-animate>
+        <div class="grid grid-cols-2 gap-4 items-start" style="align-items:center;gap:1.5rem;">
+            <svg viewBox="0 0 300 310" style="width:240px;">
+                <defs><marker id="aa7" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#94a3b8"/></marker></defs>
+                <g opacity="0.18">
+                    <rect x="75" y="12" width="150" height="36" rx="8" fill="#2496ED"/>
+                    <text x="150" y="35" text-anchor="middle" font-family="Fira Code" font-size="13" fill="white">$ docker client</text>
+                    <line x1="150" y1="50" x2="150" y2="66" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#aa7)"/>
+                    <rect x="60" y="68" width="180" height="36" rx="8" fill="white" stroke="#2496ED" stroke-width="2"/>
+                    <text x="150" y="91" text-anchor="middle" font-family="Fira Code" font-size="13" fill="#1e293b">Docker daemon</text>
+                    <line x1="150" y1="106" x2="150" y2="122" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#aa7)"/>
+                    <rect x="60" y="124" width="180" height="36" rx="8" fill="white" stroke="#2496ED" stroke-width="2"/>
+                    <text x="150" y="147" text-anchor="middle" font-family="Fira Code" font-size="13" fill="#1e293b">containerd</text>
+                    <line x1="95" y1="162" x2="45" y2="180" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#aa7)"/>
+                    <line x1="125" y1="162" x2="110" y2="180" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#aa7)"/>
+                    <line x1="175" y1="162" x2="190" y2="180" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#aa7)"/>
+                    <line x1="205" y1="162" x2="255" y2="180" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#aa7)"/>
+                    <rect x="15" y="182" width="50" height="26" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3"/><text x="40" y="200" text-anchor="middle" font-size="11" fill="#475569">shim</text>
+                    <rect x="82" y="182" width="50" height="26" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3"/><text x="107" y="200" text-anchor="middle" font-size="11" fill="#475569">shim</text>
+                    <rect x="168" y="182" width="50" height="26" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3"/><text x="193" y="200" text-anchor="middle" font-size="11" fill="#475569">shim</text>
+                    <rect x="235" y="182" width="50" height="26" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3"/><text x="260" y="200" text-anchor="middle" font-size="11" fill="#475569">shim</text>
+                    <rect x="15" y="218" width="50" height="26" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3"/><text x="40" y="236" text-anchor="middle" font-size="11" fill="#475569">runc</text>
+                    <rect x="82" y="218" width="50" height="26" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3"/><text x="107" y="236" text-anchor="middle" font-size="11" fill="#475569">runc</text>
+                    <rect x="168" y="218" width="50" height="26" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3"/><text x="193" y="236" text-anchor="middle" font-size="11" fill="#475569">runc</text>
+                    <rect x="235" y="218" width="50" height="26" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3"/><text x="260" y="236" text-anchor="middle" font-size="11" fill="#475569">runc</text>
+                </g>
+                <!-- Containers HIGHLIGHTED (bright blue) -->
+                <rect x="15" y="254" width="50" height="36" rx="3" fill="#2496ED"/>
+                <line x1="23" y1="254" x2="23" y2="290" stroke="white" stroke-width="1.5" opacity="0.5"/>
+                <line x1="31" y1="254" x2="31" y2="290" stroke="white" stroke-width="1.5" opacity="0.5"/>
+                <line x1="39" y1="254" x2="39" y2="290" stroke="white" stroke-width="1.5" opacity="0.5"/>
+                <line x1="47" y1="254" x2="47" y2="290" stroke="white" stroke-width="1.5" opacity="0.5"/>
+                <line x1="55" y1="254" x2="55" y2="290" stroke="white" stroke-width="1.5" opacity="0.5"/>
+                <rect x="82" y="254" width="50" height="36" rx="3" fill="#2496ED"/>
+                <line x1="90" y1="254" x2="90" y2="290" stroke="white" stroke-width="1.5" opacity="0.5"/>
+                <line x1="98" y1="254" x2="98" y2="290" stroke="white" stroke-width="1.5" opacity="0.5"/>
+                <line x1="106" y1="254" x2="106" y2="290" stroke="white" stroke-width="1.5" opacity="0.5"/>
+                <line x1="114" y1="254" x2="114" y2="290" stroke="white" stroke-width="1.5" opacity="0.5"/>
+                <line x1="122" y1="254" x2="122" y2="290" stroke="white" stroke-width="1.5" opacity="0.5"/>
+                <rect x="168" y="254" width="50" height="36" rx="3" fill="#2496ED"/>
+                <line x1="176" y1="254" x2="176" y2="290" stroke="white" stroke-width="1.5" opacity="0.5"/>
+                <line x1="184" y1="254" x2="184" y2="290" stroke="white" stroke-width="1.5" opacity="0.5"/>
+                <line x1="192" y1="254" x2="192" y2="290" stroke="white" stroke-width="1.5" opacity="0.5"/>
+                <line x1="200" y1="254" x2="200" y2="290" stroke="white" stroke-width="1.5" opacity="0.5"/>
+                <line x1="208" y1="254" x2="208" y2="290" stroke="white" stroke-width="1.5" opacity="0.5"/>
+                <rect x="235" y="254" width="50" height="36" rx="3" fill="#2496ED"/>
+                <line x1="243" y1="254" x2="243" y2="290" stroke="white" stroke-width="1.5" opacity="0.5"/>
+                <line x1="251" y1="254" x2="251" y2="290" stroke="white" stroke-width="1.5" opacity="0.5"/>
+                <line x1="259" y1="254" x2="259" y2="290" stroke="white" stroke-width="1.5" opacity="0.5"/>
+                <line x1="267" y1="254" x2="267" y2="290" stroke="white" stroke-width="1.5" opacity="0.5"/>
+                <line x1="275" y1="254" x2="275" y2="290" stroke="white" stroke-width="1.5" opacity="0.5"/>
+            </svg>
+            <div class="bg-[#f0f4f8] border border-blue-200 rounded-xl p-4" style="border-color:rgba(36,150,237,0.6);text-align:left;">
+                <code class="text-[#2496ED]" style="font-size:0.95em;">Running containers</code>
+                <p style="font-size:0.78em;margin:0.6em 0 0;">El resultado final: procesos aislados corriendo en el kernel del host. Cada contenedor tiene su propio <strong>filesystem</strong>, <strong>red</strong> y <strong>espacio de procesos</strong>, usando namespaces y cgroups.</p>
+            </div>
+        </div>
+    </section>
+
+</section><!-- /Arquitectura -->
+
+<!-- ═══════════════════════════════════════════════════════
+     DOCKERFILE
+════════════════════════════════════════════════════════ -->
+<section>
+
+    <!-- Process overview -->
+    <section>
+        <div class="inline-block px-3 py-0.5 rounded-full text-xs font-mono border border-blue-400/50 bg-blue-500/10 text-[#0369a1] tracking-widest mb-2">Macro</div>
+        <h2>Proceso completo</h2>
+    </section>
+
+    <section>
+        <svg viewBox="0 0 460 110" style="width:80%;margin-top:1rem;">
+            <defs>
+                <marker id="aw" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                    <path d="M0,0 L0,6 L8,3 z" fill="#2496ED"/>
+                </marker>
+            </defs>
+            <!-- Dockerfile -->
+            <rect x="5"   y="15" width="120" height="75" rx="8" fill="rgba(36,150,237,0.12)" stroke="#2496ED" stroke-width="1.5"/>
+            <text x="65"  y="46" text-anchor="middle" font-family="Montserrat" font-size="11" fill="#2496ED">Dockerfile</text>
+            <text x="65"  y="63" text-anchor="middle" font-size="9" fill="#7a869a">instrucciones</text>
+            <!-- arrow build -->
+            <path d="M127 52 L165 52" stroke="#2496ED" stroke-width="2" marker-end="url(#aw)"/>
+            <text x="146" y="44" text-anchor="middle" font-size="9" fill="#7a869a">build</text>
+            <!-- Image -->
+            <rect x="167" y="15" width="120" height="75" rx="8" fill="rgba(36,150,237,0.12)" stroke="#2496ED" stroke-width="1.5"/>
+            <text x="227" y="46" text-anchor="middle" font-family="Montserrat" font-size="11" fill="#2496ED">Image</text>
+            <text x="227" y="63" text-anchor="middle" font-size="9" fill="#7a869a">inmutable</text>
+            <!-- arrow run -->
+            <path d="M289 52 L327 52" stroke="#2496ED" stroke-width="2" marker-end="url(#aw)"/>
+            <text x="308" y="44" text-anchor="middle" font-size="9" fill="#7a869a">run</text>
+            <!-- Container -->
+            <rect x="329" y="15" width="120" height="75" rx="8" fill="rgba(22,163,74,0.1)" stroke="#16a34a" stroke-width="1.5"/>
+            <text x="389" y="46" text-anchor="middle" font-family="Montserrat" font-size="11" fill="#16a34a">Container</text>
+            <text x="389" y="63" text-anchor="middle" font-size="9" fill="#7a869a">instancia viva</text>
+        </svg>
+    </section>
+
+</section><!-- /Dockerfile -->
+
+<section>
+
+    <!-- Dockerfile intro -->
+    <section>
+        <div class="inline-block px-3 py-0.5 rounded-full text-xs font-mono border border-blue-400/50 bg-blue-500/10 text-[#0369a1] tracking-widest mb-2">Paso 1</div>
+        <h2>Dockerfile</h2>
+    </section>
+
+    <section>
+        <p class="text-[#64748b]" style="font-size:0.78em;margin-bottom:0.8rem;">Archivo de texto con instrucciones para construir una imagen.</p>
+        <pre><code class="language-dockerfile" data-trim data-line-numbers>FROM node:18-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm install
+
+COPY . .
+
+CMD ["node", "index.js"]</code></pre>
+        <div class="bg-green-50 border border-green-300/50 rounded px-4 py-2 text-sm text-[#16a34a] mt-2 font-mono text-left">Cada instrucción genera una nueva capa en la imagen</div>
+    </section>
+
+    <!-- Dockerfile step-by-step (auto-animate) -->
+    <section data-auto-animate>
+        <div class="grid grid-cols-2 gap-4 items-start" style="align-items:center;gap:1.5rem;">
+            <pre style="font-size:0.65em;margin:0;"><code class="language-dockerfile" data-trim data-line-numbers="1">FROM node:18-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm install
+
+COPY . .
+
+CMD ["node", "index.js"]</code></pre>
+            <div class="bg-[#f0f4f8] border border-blue-200 rounded-xl p-4" style="border-color:rgba(36,150,237,0.6);text-align:left;">
+                <code class="text-[#2496ED]" style="font-size:0.95em;">FROM node:18-alpine</code>
+                <p style="font-size:0.78em;margin:0.6em 0 0;">Imagen base. Node 18 sobre Alpine Linux — solo ~5 MB. Define el punto de partida de todas las capas.</p>
+            </div>
+        </div>
+    </section>
+    <section data-auto-animate>
+        <div class="grid grid-cols-2 gap-4 items-start" style="align-items:center;gap:1.5rem;">
+            <pre style="font-size:0.65em;margin:0;"><code class="language-dockerfile" data-trim data-line-numbers="3">FROM node:18-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm install
+
+COPY . .
+
+CMD ["node", "index.js"]</code></pre>
+            <div class="bg-[#f0f4f8] border border-blue-200 rounded-xl p-4" style="border-color:rgba(3,105,161,0.5);text-align:left;">
+                <code class="text-[#0369a1]" style="font-size:0.95em;">WORKDIR /app</code>
+                <p style="font-size:0.78em;margin:0.6em 0 0;">Establece el directorio de trabajo dentro del contenedor. Todos los comandos siguientes se ejecutarán desde aquí.</p>
+            </div>
+        </div>
+    </section>
+    <section data-auto-animate>
+        <div class="grid grid-cols-2 gap-4 items-start" style="align-items:center;gap:1.5rem;">
+            <pre style="font-size:0.65em;margin:0;"><code class="language-dockerfile" data-trim data-line-numbers="5">FROM node:18-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm install
+
+COPY . .
+
+CMD ["node", "index.js"]</code></pre>
+            <div class="bg-[#f0f4f8] border border-blue-200 rounded-xl p-4" style="border-color:rgba(251,146,60,0.6);text-align:left;">
+                <code class="text-[#ea580c]" style="font-size:0.95em;">COPY package*.json ./</code>
+                <p style="font-size:0.78em;margin:0.6em 0 0;">Copia primero solo el package.json. Así Docker puede <strong>cachear esta capa</strong> — si las dependencias no cambian, no se reinstalan en el próximo build.</p>
+            </div>
+        </div>
+    </section>
+    <section data-auto-animate>
+        <div class="grid grid-cols-2 gap-4 items-start" style="align-items:center;gap:1.5rem;">
+            <pre style="font-size:0.65em;margin:0;"><code class="language-dockerfile" data-trim data-line-numbers="7">FROM node:18-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm install
+
+COPY . .
+
+CMD ["node", "index.js"]</code></pre>
+            <div class="bg-[#f0f4f8] border border-blue-200 rounded-xl p-4" style="border-color:rgba(74,222,128,0.6);text-align:left;">
+                <code class="text-[#16a34a]" style="font-size:0.95em;">RUN npm install</code>
+                <p style="font-size:0.78em;margin:0.6em 0 0;">Se ejecuta durante la <strong>construcción</strong> de la imagen. Instala dependencias. El resultado queda guardado como una capa inmutable.</p>
+            </div>
+        </div>
+    </section>
+    <section data-auto-animate>
+        <div class="grid grid-cols-2 gap-4 items-start" style="align-items:center;gap:1.5rem;">
+            <pre style="font-size:0.65em;margin:0;"><code class="language-dockerfile" data-trim data-line-numbers="9">FROM node:18-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm install
+
+COPY . .
+
+CMD ["node", "index.js"]</code></pre>
+            <div class="bg-[#f0f4f8] border border-blue-200 rounded-xl p-4" style="border-color:rgba(36,150,237,0.6);text-align:left;">
+                <code class="text-[#2496ED]" style="font-size:0.95em;">COPY . .</code>
+                <p style="font-size:0.78em;margin:0.6em 0 0;">Copia el resto del código fuente. Va <em>después</em> del <code>RUN npm install</code> para maximizar el uso del caché.</p>
+            </div>
+        </div>
+    </section>
+    <section data-auto-animate>
+        <div class="grid grid-cols-2 gap-4 items-start" style="align-items:center;gap:1.5rem;">
+            <pre style="font-size:0.65em;margin:0;"><code class="language-dockerfile" data-trim data-line-numbers="11">FROM node:18-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm install
+
+COPY . .
+
+CMD ["node", "index.js"]</code></pre>
+            <div class="bg-[#f0f4f8] border border-blue-200 rounded-xl p-4" style="border-color:rgba(167,139,250,0.6);text-align:left;">
+                <code class="text-[#7c3aed]" style="font-size:0.95em;">CMD ["node", "index.js"]</code>
+                <p style="font-size:0.78em;margin:0.6em 0 0;">Comando por defecto al <strong>ejecutar</strong> el contenedor. Solo puede haber un CMD — al poner varios, el último prevalece.</p>
+            </div>
+        </div>
+    </section>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     IMAGEN
+════════════════════════════════════════════════════════ -->
+<section>
+    <section>
+        <div class="inline-block px-3 py-0.5 rounded-full text-xs font-mono border border-blue-400/50 bg-blue-500/10 text-[#0369a1] tracking-widest mb-2">Paso 2</div>
+        <h2>Imagen</h2>
+    </section>
+    <section>
+        <div class="inline-block px-3 py-0.5 rounded-full text-xs font-mono border border-blue-400/50 bg-blue-500/10 text-[#0369a1] tracking-widest mb-2">Imágenes y Capas</div>
+        <div class="grid grid-cols-2 gap-4 items-start" style="align-items:center;">
+            <div style="font-size:0.82em;text-align:left;">
+                <p class="text-[#64748b]">Cada instrucción del Dockerfile genera una <strong style="color:var(--txt);">capa inmutable</strong>.</p>
+                <p class="text-[#64748b] fragment">Las capas se <strong class="text-[#0369a1]">reutilizan</strong> entre builds e imágenes → eficiencia de almacenamiento.</p>
+                <p class="text-[#64748b] fragment">Solo la <strong class="text-[#16a34a]">capa del contenedor</strong> es escribible — la imagen en sí jamás cambia.</p>
+            </div>
+            <svg viewBox="0 0 220 295" style="width:190px;">
+                <rect x="15" y="260" width="190" height="28" rx="5" fill="rgba(36,150,237,0.12)" stroke="#2496ED" stroke-width="1.5"/>
+                <text x="110" y="279" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#1e40af">FROM node:18-alpine</text>
+                <rect x="15" y="224" width="190" height="28" rx="5" fill="rgba(36,150,237,0.22)" stroke="#2496ED" stroke-width="1.5"/>
+                <text x="110" y="243" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#1e40af">WORKDIR /app</text>
+                <rect x="15" y="188" width="190" height="28" rx="5" fill="rgba(36,150,237,0.34)" stroke="#2496ED" stroke-width="1.5"/>
+                <text x="110" y="207" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#1e3a8a">COPY package.json</text>
+                <rect x="15" y="152" width="190" height="28" rx="5" fill="rgba(36,150,237,0.48)" stroke="#2496ED" stroke-width="1.5"/>
+                <text x="110" y="171" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#1e293b">RUN npm install</text>
+                <rect x="15" y="116" width="190" height="28" rx="5" fill="rgba(36,150,237,0.62)" stroke="#2496ED" stroke-width="1.5"/>
+                <text x="110" y="135" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#1e293b">COPY . .</text>
+                <rect x="15" y="80" width="190" height="28" rx="5" fill="rgba(36,150,237,0.78)" stroke="#2496ED" stroke-width="1.5"/>
+                <text x="110" y="99" text-anchor="middle" font-family="Fira Code" font-size="9" fill="white">CMD ["node", ...]</text>
+                <rect x="5" y="44" width="210" height="28" rx="5" fill="rgba(22,163,74,0.1)" stroke="#16a34a" stroke-width="2" stroke-dasharray="5,3"/>
+                <text x="110" y="63" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#16a34a">Container layer (writable)</text>
+                <text x="110" y="20" text-anchor="middle" font-family="Inter" font-size="10" fill="#64748b">↑  arriba = más reciente</text>
+            </svg>
+        </div>
+    </section>
+</section><!-- /Imagen -->
+
+<!-- ═══════════════════════════════════════════════════════
+     CONTENEDOR
+════════════════════════════════════════════════════════ -->
+<section>
+    <section>
+        <div class="inline-block px-3 py-0.5 rounded-full text-xs font-mono border border-blue-400/50 bg-blue-500/10 text-[#0369a1] tracking-widest mb-2">Paso 3</div>
+        <h2>Contenedor</h2>
+    </section>
+    <section>
+        <div class="inline-block px-3 py-0.5 rounded-full text-xs font-mono border border-blue-400/50 bg-blue-500/10 text-[#0369a1] tracking-widest mb-2">Contenedores</div>
+        <p class="text-[#64748b]" style="font-size:0.82em;">Instancias en ejecución basadas en una imagen.</p>
+        <div class="grid grid-cols-3 gap-3" style="margin-top:1rem;">
+            <div class="bg-[#f0f4f8] border border-blue-200 rounded-xl p-4 fragment" style="text-align:center;font-size:0.8em;">
+                <div style="font-size:1.7em;">⚡</div>
+                <strong>Ligeros</strong>
+                <p class="text-[#64748b]" style="font-size:0.82em;margin:0.3em 0 0;">Comparten el kernel del host</p>
+            </div>
+            <div class="bg-[#f0f4f8] border border-blue-200 rounded-xl p-4 fragment" style="text-align:center;font-size:0.8em;">
+                <div style="font-size:1.7em;">🔒</div>
+                <strong>Independientes</strong>
+                <p class="text-[#64748b]" style="font-size:0.82em;margin:0.3em 0 0;">Filesystem propio por contenedor</p>
+            </div>
+            <div class="bg-[#f0f4f8] border border-blue-200 rounded-xl p-4 fragment" style="text-align:center;font-size:0.8em;">
+                <div style="font-size:1.7em;">💾</div>
+                <strong>Efímeros</strong>
+                <p class="text-[#64748b]" style="font-size:0.82em;margin:0.3em 0 0;">Datos persistentes → volúmenes</p>
+            </div>
+        </div>
+    </section>
+</section><!-- /Contenedor -->
+
+<!-- ═══════════════════════════════════════════════════════
+     DOCKER HUB
+════════════════════════════════════════════════════════ -->
+<section>
+    <section>
+        <div class="inline-block px-3 py-0.5 rounded-full text-xs font-mono border border-blue-400/50 bg-blue-500/10 text-[#0369a1] tracking-widest mb-2">Registry</div>
+        <h2>Docker Hub</h2>
+    </section>
+    <section>
+        <p class="text-[#64748b]" style="font-size:0.82em;">Registry centralizado para compartir y descargar imágenes.</p>
+        <svg viewBox="0 0 600 185" style="width:92%;margin-top:0.6rem;">
+            <defs>
+                <marker id="ahp" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                    <path d="M0,0 L0,6 L8,3 z" fill="#16a34a"/>
+                </marker>
+                <marker id="ahp2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                    <path d="M0,0 L0,6 L8,3 z" fill="#2496ED"/>
+                </marker>
+            </defs>
+            <rect x="215" y="55" width="165" height="72" rx="10" fill="#7c3aed" stroke="#7c3aed" stroke-width="2"/>
+            <text x="297" y="88" text-anchor="middle" font-family="Montserrat" font-size="12" fill="white">Docker Hub</text>
+            <text x="297" y="108" text-anchor="middle" font-size="10" fill="#e9d5ff">hub.docker.com</text>
+            <rect x="20" y="15" width="145" height="50" rx="7" fill="rgba(36,150,237,0.12)" stroke="#2496ED" stroke-width="1.5"/>
+            <text x="92" y="37" text-anchor="middle" font-size="11" fill="#1e40af">Imágenes Oficiales</text>
+            <text x="92" y="55" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#64748b">nginx, postgres, node...</text>
+            <path d="M165 40 L215 75" stroke="#2496ED" stroke-width="1.5" stroke-dasharray="4,3"/>
+            <rect x="20" y="115" width="145" height="50" rx="7" fill="rgba(36,150,237,0.08)" stroke="#2496ED" stroke-width="1"/>
+            <text x="92" y="137" text-anchor="middle" font-size="11" fill="#1e40af">Comunidad</text>
+            <text x="92" y="155" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#64748b">user/app:latest</text>
+            <path d="M165 140 L215 112" stroke="#2496ED" stroke-width="1" stroke-dasharray="4,3"/>
+            <rect x="435" y="60" width="145" height="62" rx="7" fill="rgba(22,163,74,0.1)" stroke="#16a34a" stroke-width="1.5"/>
+            <text x="507" y="86" text-anchor="middle" font-size="11" fill="#16a34a">Tu máquina</text>
+            <text x="507" y="104" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#64748b">push / pull</text>
+            <path d="M380 83 L435 83" stroke="#16a34a" stroke-width="1.8" marker-end="url(#ahp)"/>
+            <path d="M435 99 L380 99" stroke="#16a34a" stroke-width="1.8" marker-end="url(#ahp2)"/>
+        </svg>
+        <div class="fragment" style="margin-top:0.5rem;">
+            <span class="inline-block bg-[#eef2f7] border border-blue-300/50 rounded px-3 py-0.5 font-mono text-sm text-[#0369a1] m-1">docker pull nginx:latest</span>
+            <span class="inline-block bg-[#eef2f7] border border-blue-300/50 rounded px-3 py-0.5 font-mono text-sm text-[#0369a1] m-1">docker push user/app:v1.0</span>
+        </div>
+    </section>
+</section><!-- /Docker Hub -->
+
+<!-- ═══════════════════════════════════════════════════════
+     EJEMPLOS
+════════════════════════════════════════════════════════ -->
+<section>
+
+    <!-- Title -->
+    <section>
+        <div class="inline-block px-3 py-0.5 rounded-full text-xs font-mono border border-blue-400/50 bg-blue-500/10 text-[#0369a1] tracking-widest mb-2">Práctica</div>
+        <h2>Corriendo contenedores</h2>
+    </section>
+
+    <!-- Step 1: build the image -->
+    <section data-auto-animate>
+        <div class="inline-block px-3 py-0.5 rounded-full text-xs font-mono border border-blue-400/50 bg-blue-500/10 text-[#0369a1] tracking-widest mb-2">Paso 1 · build</div>
+        <h3 style="margin-bottom:0.6rem;">Construir la imagen</h3>
+        <pre><code class="language-bash" data-trim>docker build -t my-app .</code></pre>
+        <div class="grid grid-cols-3 gap-3" style="margin-top:1rem;width:100%;">
+            <div class="bg-[#f0f4f8] border border-blue-200 rounded-xl p-3" style="text-align:left;">
+                <code class="text-[#2496ED]" style="font-size:0.82em;">build</code>
+                <p class="text-[#64748b]" style="font-size:0.72em;margin:0.3em 0 0;">Lee el Dockerfile y construye cada capa</p>
+            </div>
+            <div class="bg-[#f0f4f8] border border-blue-200 rounded-xl p-3" style="text-align:left;">
+                <code class="text-[#2496ED]" style="font-size:0.82em;">-t my-app</code>
+                <p class="text-[#64748b]" style="font-size:0.72em;margin:0.3em 0 0;">Le da un nombre (tag) a la imagen resultante</p>
+            </div>
+            <div class="bg-[#f0f4f8] border border-blue-200 rounded-xl p-3" style="text-align:left;">
+                <code class="text-[#2496ED]" style="font-size:0.82em;">.</code>
+                <p class="text-[#64748b]" style="font-size:0.72em;margin:0.3em 0 0;">Usa el directorio actual como contexto de build</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Step 2: run — isolated (dumb box) -->
+    <section data-auto-animate>
+        <div class="inline-block px-3 py-0.5 rounded-full text-xs font-mono border border-blue-400/50 bg-blue-500/10 text-[#0369a1] tracking-widest mb-2">Paso 2 · run</div>
+        <h3 style="margin-bottom:0.6rem;">Correr el contenedor</h3>
+        <pre><code class="language-bash" data-trim>docker run my-app</code></pre>
+        <div class="bg-[#fff7ed] border border-orange-300 rounded-xl p-4" style="margin-top:1rem;text-align:left;width:100%;">
+            <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.4rem;">
+                <span style="font-size:1.3em;">📦</span>
+                <strong style="color:#ea580c;font-size:0.9em;">Caja sellada</strong>
+            </div>
+            <p class="text-[#64748b]" style="font-size:0.78em;margin:0;">El contenedor corre, pero está completamente <strong style="color:#ea580c;">aislado</strong>. Sin puertos mapeados, sin acceso a archivos del host, sin red configurada — nadie puede hablar con él desde afuera.</p>
+        </div>
+    </section>
+
+    <!-- Ports intro -->
+    <section>
+        <div class="inline-block px-3 py-0.5 rounded-full text-xs font-mono border border-blue-400/50 bg-blue-500/10 text-[#0369a1] tracking-widest mb-2">Puertos</div>
+        <h3 style="margin-bottom:0.6rem;">Abrir una puerta: <code style="color:#2496ED;">-p</code></h3>
+        <pre><code class="language-bash" data-trim>docker run -p 3000:3000 my-app</code></pre>
+        <svg viewBox="0 0 520 160" style="width:82%;margin-top:0.8rem;">
+            <defs>
+                <marker id="ep" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+                    <path d="M0,0 L0,6 L7,3 z" fill="#2496ED"/>
+                </marker>
+            </defs>
+            <rect x="5" y="20" width="200" height="120" rx="10" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5"/>
+            <text x="105" y="44" text-anchor="middle" font-family="Montserrat" font-size="11" fill="#64748b">Host</text>
+            <rect x="150" y="62" width="50" height="30" rx="6" fill="#dbeafe" stroke="#2496ED" stroke-width="1.5"/>
+            <text x="175" y="82" text-anchor="middle" font-family="Fira Code" font-size="11" fill="#2496ED">3000</text>
+            <path d="M207 77 L308 77" stroke="#2496ED" stroke-width="2" stroke-dasharray="5,3" marker-end="url(#ep)"/>
+            <text x="258" y="68" text-anchor="middle" font-size="9" fill="#7a869a">-p 3000:3000</text>
+            <rect x="310" y="20" width="200" height="120" rx="10" fill="rgba(36,150,237,0.07)" stroke="#2496ED" stroke-width="1.5"/>
+            <text x="410" y="44" text-anchor="middle" font-family="Montserrat" font-size="11" fill="#2496ED">Container</text>
+            <rect x="315" y="62" width="50" height="30" rx="6" fill="#dbeafe" stroke="#2496ED" stroke-width="1.5"/>
+            <text x="340" y="82" text-anchor="middle" font-family="Fira Code" font-size="11" fill="#2496ED">3000</text>
+            <rect x="372" y="62" width="120" height="30" rx="6" fill="rgba(22,163,74,0.12)" stroke="#16a34a" stroke-width="1"/>
+            <text x="432" y="82" text-anchor="middle" font-size="10" fill="#16a34a">my-app :3000</text>
+        </svg>
+        <p class="text-[#64748b]" style="font-size:0.75em;margin-top:0.6rem;"><strong style="color:#1e293b;">host:container</strong> — el tráfico al puerto 3000 del host llega al puerto 3000 del contenedor</p>
+    </section>
+
+    <!-- Node: live demo context -->
+    <section>
+        <h3 style="margin-bottom:0.5rem;">Nuestra app en un contenedor</h3>
+        <pre><code class="language-bash" data-trim># docker run -p 3000:3000 my-app</code></pre>
+        <div class="grid grid-cols-2 gap-4" style="margin-top:0.9rem;width:100%;">
+            <div class="bg-[#f0f4f8] border border-blue-200 rounded-xl p-4" style="text-align:left;">
+                <p style="margin:0;font-size:0.8em;">Un servidor Node puro que lee <code>index.html</code> y lo devuelve en cada request. Sin dependencias externas.</p>
+                <p class="text-[#64748b]" style="font-size:0.75em;margin:0.5em 0 0;">→ <code>localhost:3000</code> responde ✓</p>
+            </div>
+            <div class="bg-[#fff7ed] border border-orange-200 rounded-xl p-4" style="text-align:left;">
+                <p style="margin:0;font-size:0.8em;">Al editar <code>index.html</code> en la máquina y recargar el browser...</p>
+                <p class="text-[#64748b]" style="font-size:0.75em;margin:0.5em 0 0;"><strong style="color:#ea580c;">No cambia nada.</strong></p>
+                <p class="text-[#64748b]" style="font-size:0.75em;margin:0.3em 0 0;">El archivo fue copiado <em>dentro</em> del contenedor al hacer build.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why files don't sync: COPY vs volume -->
+    <section>
+        <div class="inline-block px-3 py-0.5 rounded-full text-xs font-mono border border-blue-400/50 bg-blue-500/10 text-[#0369a1] tracking-widest mb-2">Problema</div>
+        <h3 style="margin-bottom:0.5rem;">Los archivos están <em>adentro</em></h3>
+        <svg viewBox="0 0 560 200" style="width:88%;margin-top:0.4rem;">
+            <defs>
+                <marker id="ev" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+                    <path d="M0,0 L0,6 L7,3 z" fill="#dc2626"/>
+                </marker>
+            </defs>
+            <rect x="5" y="10" width="220" height="180" rx="10" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5"/>
+            <text x="115" y="34" text-anchor="middle" font-family="Montserrat" font-size="11" fill="#64748b">Host</text>
+            <rect x="25" y="50" width="180" height="36" rx="6" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1"/>
+            <text x="115" y="72" text-anchor="middle" font-family="Fira Code" font-size="11" fill="#475569">./index.html</text>
+            <rect x="55" y="102" width="120" height="28" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1"/>
+            <text x="115" y="121" text-anchor="middle" font-size="10" fill="#92400e">✏️  editas el archivo</text>
+            <line x1="227" y1="100" x2="320" y2="100" stroke="#dc2626" stroke-width="2" stroke-dasharray="5,3" marker-end="url(#ev)"/>
+            <text x="274" y="91" text-anchor="middle" font-size="9" fill="#dc2626">✗ no llega</text>
+            <rect x="322" y="10" width="230" height="180" rx="10" fill="rgba(36,150,237,0.07)" stroke="#2496ED" stroke-width="1.5"/>
+            <text x="437" y="34" text-anchor="middle" font-family="Montserrat" font-size="11" fill="#2496ED">Container</text>
+            <rect x="342" y="50" width="190" height="36" rx="6" fill="#dbeafe" stroke="#2496ED" stroke-width="1"/>
+            <text x="437" y="72" text-anchor="middle" font-family="Fira Code" font-size="11" fill="#2496ED">/app/index.html</text>
+            <rect x="342" y="102" width="190" height="28" rx="6" fill="rgba(36,150,237,0.1)" stroke="#2496ED" stroke-width="1"/>
+            <text x="437" y="121" text-anchor="middle" font-size="10" fill="#1e293b">copia fija del build</text>
+            <text x="437" y="158" text-anchor="middle" font-size="9" fill="#64748b">(COPY . . en Dockerfile)</text>
+        </svg>
+        <p class="text-[#64748b]" style="font-size:0.75em;margin-top:0.5rem;"><code>COPY</code> toma una <strong>foto</strong> en el momento del build — cambios posteriores no se reflejan sin volver a hacer build.</p>
+    </section>
+
+    <!-- Solution: volume mount -->
+    <section>
+        <div class="inline-block px-3 py-0.5 rounded-full text-xs font-mono border border-blue-400/50 bg-blue-500/10 text-[#0369a1] tracking-widest mb-2">Solución · Volúmenes</div>
+        <h3 style="margin-bottom:0.5rem;">Montar el directorio con <code style="color:#2496ED;">-v</code></h3>
+        <pre><code class="language-bash" data-trim>docker run -p 3000:3000 -v .:/app my-app</code></pre>
+        <svg viewBox="0 0 560 180" style="width:88%;margin-top:0.8rem;">
+            <defs>
+                <marker id="evok" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+                    <path d="M0,0 L0,6 L7,3 z" fill="#16a34a"/>
+                </marker>
+            </defs>
+            <rect x="5" y="10" width="220" height="160" rx="10" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5"/>
+            <text x="115" y="34" text-anchor="middle" font-family="Montserrat" font-size="11" fill="#64748b">Host</text>
+            <rect x="25" y="50" width="180" height="36" rx="6" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1"/>
+            <text x="115" y="72" text-anchor="middle" font-family="Fira Code" font-size="11" fill="#475569">./index.html</text>
+            <rect x="55" y="100" width="120" height="28" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1"/>
+            <text x="115" y="119" text-anchor="middle" font-size="10" fill="#92400e">✏️  editas el archivo</text>
+            <path d="M227 90 L318 90" stroke="#16a34a" stroke-width="2.5" marker-end="url(#evok)"/>
+            <path d="M318 110 L227 110" stroke="#16a34a" stroke-width="2.5" marker-end="url(#evok)"/>
+            <text x="273" y="82" text-anchor="middle" font-size="9" fill="#16a34a">live sync</text>
+            <rect x="228" y="118" width="94" height="22" rx="5" fill="rgba(22,163,74,0.12)" stroke="#16a34a" stroke-width="1"/>
+            <text x="275" y="133" text-anchor="middle" font-size="9" fill="#16a34a">-v .:/app</text>
+            <rect x="320" y="10" width="230" height="160" rx="10" fill="rgba(36,150,237,0.07)" stroke="#2496ED" stroke-width="1.5"/>
+            <text x="435" y="34" text-anchor="middle" font-family="Montserrat" font-size="11" fill="#2496ED">Container</text>
+            <rect x="340" y="50" width="190" height="36" rx="6" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
+            <text x="435" y="72" text-anchor="middle" font-family="Fira Code" font-size="11" fill="#16a34a">/app/index.html</text>
+            <text x="435" y="112" text-anchor="middle" font-size="9" fill="#64748b">mismo filesystem, en tiempo real</text>
+        </svg>
+        <p class="text-[#64748b]" style="font-size:0.75em;margin-top:0.4rem;">El directorio del host <strong style="color:#1e293b;">se monta directamente</strong> — al recargar el browser el cambio ya está ahí.</p>
+    </section>
+
+</section><!-- /Ejemplos -->
+
+<!-- ═══════════════════════════════════════════════════════
+     DOCKER COMPOSE
+════════════════════════════════════════════════════════ -->
+<section>
+    <section>
+        <div class="inline-block px-3 py-0.5 rounded-full text-xs font-mono border border-blue-400/50 bg-blue-500/10 text-[#0369a1] tracking-widest mb-2">Orquestación</div>
+        <h2>Docker Compose</h2>
+    </section>
+
+    <!-- Before vs After: the motivation -->
+    <section>
+        <div class="inline-block px-3 py-0.5 rounded-full text-xs font-mono border border-blue-400/50 bg-blue-500/10 text-[#0369a1] tracking-widest mb-2">Problema</div>
+        <h3 style="margin-bottom:0.8rem;">Un comando que se va haciendo largo...</h3>
+        <div class="grid grid-cols-2 gap-5" style="width:100%;">
+            <div style="text-align:left;">
+                <p class="text-[#64748b]" style="font-size:0.72em;margin:0 0 0.4rem;">Antes</p>
+                <pre style="margin:0;"><code class="language-bash" data-trim>docker run \
+  -p 3000:3000 \
+  -v .:/app \
+  my-app</code></pre>
+            </div>
+            <div style="text-align:left;">
+                <p class="text-[#16a34a]" style="font-size:0.72em;margin:0 0 0.4rem;font-weight:600;">Con Compose</p>
+                <pre style="margin:0;"><code class="language-bash" data-trim>docker compose up</code></pre>
+                <p class="text-[#64748b]" style="font-size:0.72em;margin:0.6rem 0 0;">Todo lo que configuraste a mano queda declarado en un archivo. Un solo comando lo levanta todo.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Compose YAML overview -->
+    <section>
+        <p class="text-[#64748b]" style="font-size:0.78em;margin-bottom:0.8rem;">La misma app de Node — ahora en <code>docker-compose.yml</code></p>
+        <pre><code class="language-yaml" data-trim>services:
+  web:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app</code></pre>
+    </section>
+
+    <!-- Compose step-by-step -->
+    <section data-auto-animate>
+        <div class="grid grid-cols-2 gap-4 items-start" style="align-items:center;gap:1.5rem;">
+            <pre style="font-size:0.72em;margin:0;"><code class="language-yaml" data-trim data-line-numbers="1">services:
+  web:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app</code></pre>
+            <div class="bg-[#f0f4f8] border border-blue-200 rounded-xl p-4" style="border-color:rgba(36,150,237,0.6);text-align:left;">
+                <code class="text-[#2496ED]">services:</code>
+                <p style="font-size:0.78em;margin:0.6em 0 0;">Define los <strong>servicios</strong> de la aplicación. Cada clave dentro de <code>services</code> es un contenedor independiente.</p>
+            </div>
+        </div>
+    </section>
+    <section data-auto-animate>
+        <div class="grid grid-cols-2 gap-4 items-start" style="align-items:center;gap:1.5rem;">
+            <pre style="font-size:0.72em;margin:0;"><code class="language-yaml" data-trim data-line-numbers="2-3">services:
+  web:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app</code></pre>
+            <div class="bg-[#f0f4f8] border border-blue-200 rounded-xl p-4" style="border-color:rgba(3,105,161,0.5);text-align:left;">
+                <code class="text-[#0369a1]">build: .</code>
+                <p style="font-size:0.78em;margin:0.6em 0 0;">En lugar de descargar una imagen, Compose construye desde el <code>Dockerfile</code> del directorio actual — la misma app de Node.</p>
+            </div>
+        </div>
+    </section>
+    <section data-auto-animate>
+        <div class="grid grid-cols-2 gap-4 items-start" style="align-items:center;gap:1.5rem;">
+            <pre style="font-size:0.72em;margin:0;"><code class="language-yaml" data-trim data-line-numbers="4-5">services:
+  web:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app</code></pre>
+            <div class="bg-[#f0f4f8] border border-blue-200 rounded-xl p-4" style="border-color:rgba(251,146,60,0.6);text-align:left;">
+                <code class="text-[#ea580c]">ports: "3000:3000"</code>
+                <p style="font-size:0.78em;margin:0.6em 0 0;">Equivale al flag <code>-p 3000:3000</code>. <strong>HOST : CONTENEDOR</strong> — el tráfico del puerto 3000 de tu máquina llega al 3000 del contenedor.</p>
+            </div>
+        </div>
+    </section>
+    <section data-auto-animate>
+        <div class="grid grid-cols-2 gap-4 items-start" style="align-items:center;gap:1.5rem;">
+            <pre style="font-size:0.72em;margin:0;"><code class="language-yaml" data-trim data-line-numbers="6-7">services:
+  web:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app</code></pre>
+            <div class="bg-[#f0f4f8] border border-blue-200 rounded-xl p-4" style="border-color:rgba(74,222,128,0.6);text-align:left;">
+                <code class="text-[#16a34a]">volumes: .:/app</code>
+                <p style="font-size:0.78em;margin:0.6em 0 0;">Equivale al flag <code>-v .:/app</code>. El directorio local se monta en el contenedor — cambios en <code>index.html</code> se ven al instante.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Multi-container: the concept -->
+    <section>
+        <div class="inline-block px-3 py-0.5 rounded-full text-xs font-mono border border-blue-400/50 bg-blue-500/10 text-[#0369a1] tracking-widest mb-2">Multicontenedor</div>
+        <h3 style="margin-bottom:0.6rem;">Liga Española — 3 servicios, 1 comando</h3>
+        <svg viewBox="0 0 720 230" style="width:96%;margin-top:0.4rem;">
+            <defs>
+                <marker id="mc1" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#2496ED"/></marker>
+                <marker id="mc2" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#16a34a"/></marker>
+                <marker id="mc3" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#ea580c"/></marker>
+            </defs>
+            <!-- Browser -->
+            <rect x="8" y="75" width="100" height="80" rx="8" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.5"/>
+            <text x="58" y="108" text-anchor="middle" font-size="22">🌐</text>
+            <text x="58" y="128" text-anchor="middle" font-size="10" fill="#64748b">browser</text>
+            <text x="58" y="143" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#94a3b8">localhost:5173</text>
+            <!-- Arrow browser→frontend -->
+            <path d="M110 115 L183 115" stroke="#2496ED" stroke-width="2" marker-end="url(#mc1)"/>
+            <text x="146" y="107" text-anchor="middle" font-size="9" fill="#7a869a">:5173</text>
+            <!-- Frontend -->
+            <rect x="185" y="55" width="148" height="120" rx="10" fill="rgba(36,150,237,0.07)" stroke="#2496ED" stroke-width="2"/>
+            <text x="259" y="82" text-anchor="middle" font-family="Montserrat" font-size="11" font-weight="600" fill="#2496ED">frontend</text>
+            <text x="259" y="100" text-anchor="middle" font-family="Fira Code" font-size="10" fill="#475569">React + Vite</text>
+            <text x="259" y="118" text-anchor="middle" font-size="9" fill="#64748b">muestra equipos</text>
+            <text x="259" y="148" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#94a3b8">build: ./frontend</text>
+            <text x="259" y="163" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#94a3b8">:5173</text>
+            <!-- Arrow frontend→backend -->
+            <path d="M335 115 L393 115" stroke="#16a34a" stroke-width="2" stroke-dasharray="5,3" marker-end="url(#mc2)"/>
+            <text x="364" y="107" text-anchor="middle" font-size="9" fill="#16a34a">GET /teams</text>
+            <!-- Backend -->
+            <rect x="395" y="55" width="148" height="120" rx="10" fill="rgba(22,163,74,0.07)" stroke="#16a34a" stroke-width="2"/>
+            <text x="469" y="82" text-anchor="middle" font-family="Montserrat" font-size="11" font-weight="600" fill="#16a34a">backend</text>
+            <text x="469" y="100" text-anchor="middle" font-family="Fira Code" font-size="10" fill="#475569">FastAPI</text>
+            <text x="469" y="118" text-anchor="middle" font-size="9" fill="#64748b">API REST</text>
+            <text x="469" y="148" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#94a3b8">build: ./backend</text>
+            <text x="469" y="163" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#94a3b8">:8000</text>
+            <!-- Arrow backend→db (via volume) -->
+            <path d="M545 115 L600 115" stroke="#ea580c" stroke-width="2" stroke-dasharray="5,3" marker-end="url(#mc3)"/>
+            <text x="572" y="107" text-anchor="middle" font-size="9" fill="#ea580c">volume</text>
+            <!-- DB -->
+            <rect x="602" y="55" width="110" height="120" rx="10" fill="rgba(234,88,12,0.07)" stroke="#ea580c" stroke-width="2"/>
+            <text x="657" y="82" text-anchor="middle" font-family="Montserrat" font-size="11" font-weight="600" fill="#ea580c">db</text>
+            <text x="657" y="100" text-anchor="middle" font-family="Fira Code" font-size="10" fill="#475569">SQLite</text>
+            <text x="657" y="118" text-anchor="middle" font-size="9" fill="#64748b">seed + datos</text>
+            <text x="657" y="148" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#94a3b8">build: ./db</text>
+            <text x="657" y="163" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#94a3b8">one-shot</text>
+            <!-- Volume label at bottom -->
+            <rect x="395" y="193" width="316" height="24" rx="6" fill="rgba(234,88,12,0.08)" stroke="#ea580c" stroke-width="1" stroke-dasharray="4,3"/>
+            <text x="553" y="209" text-anchor="middle" font-size="10" fill="#ea580c">named volume: db-data  (compartido entre db y backend)</text>
+        </svg>
+    </section>
+
+    <section>
+        <p class="text-[#64748b]" style="font-size:0.82em;">Los contenedores en la misma red se comunican por <strong style="color:var(--txt);">nombre de servicio</strong>, sin necesidad de conocer IPs.</p>
+        <svg viewBox="0 0 640 225" style="width:94%;">
+            <defs>
+                <marker id="anet" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                    <path d="M0,0 L0,6 L8,3 z" fill="#0369a1"/>
+                </marker>
+            </defs>
+            <!-- Network boundary -->
+            <rect x="15" y="25" width="608" height="165" rx="12" fill="rgba(124,58,237,0.06)" stroke="#7c3aed" stroke-width="1.5" stroke-dasharray="8,4"/>
+            <text x="320" y="17" text-anchor="middle" font-family="Montserrat" font-size="11" fill="#7c3aed">app-network</text>
+            <!-- web container -->
+            <rect x="40" y="60" width="145" height="90" rx="8" fill="rgba(36,150,237,0.12)" stroke="#2496ED" stroke-width="1.5"/>
+            <text x="112" y="97" text-anchor="middle" font-family="Fira Code" font-size="12" fill="#1e40af">frontend</text>
+            <text x="112" y="117" text-anchor="middle" font-size="10" fill="#64748b">react</text>
+            <text x="112" y="134" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#475569">http://frontend:5173</text>
+            <!-- api container -->
+            <rect x="248" y="60" width="145" height="90" rx="8" fill="rgba(36,150,237,0.12)" stroke="#2496ED" stroke-width="1.5"/>
+            <text x="320" y="97" text-anchor="middle" font-family="Fira Code" font-size="12" fill="#1e40af">backend</text>
+            <text x="320" y="117" text-anchor="middle" font-size="10" fill="#64748b">fastapi</text>
+            <text x="320" y="134" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#475569">http://backend:8000</text>
+            <!-- db container -->
+            <rect x="456" y="60" width="145" height="90" rx="8" fill="rgba(22,163,74,0.1)" stroke="#16a34a" stroke-width="1.5"/>
+            <text x="528" y="97" text-anchor="middle" font-family="Fira Code" font-size="12" fill="#16a34a">db</text>
+            <text x="528" y="117" text-anchor="middle" font-size="10" fill="#64748b">sqlite</text>
+            <text x="528" y="134" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#475569">host: db</text>
+            <!-- Connections -->
+            <path d="M185 105 L248 105" stroke="#0369a1" stroke-width="2" marker-end="url(#anet)"/>
+            <path d="M393 105 L456 105" stroke="#0369a1" stroke-width="2" marker-end="url(#anet)"/>
+            <!-- Bottom note -->
+            <text x="320" y="208" text-anchor="middle" font-size="11" fill="#64748b">Los servicios se resuelven por nombre —  <tspan font-family="Fira Code" fill="#7c3aed">http://backend:8000</tspan>  funciona directo</text>
+        </svg>
+    </section>
+
+    <!-- YAML overview -->
+    <section>
+        <p class="text-[#64748b]" style="font-size:0.78em;margin-bottom:0.8rem;">Tres servicios declarados</p>
+        <pre><code class="language-yaml" data-trim>services:
+  db:
+    build: ./db
+    volumes:
+      - db-data:/data
+
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - db-data:/data
+    depends_on:
+      db:
+        condition: service_completed_successfully
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+volumes:
+  db-data:</code></pre>
+    </section>
+
+    <!-- Step by step: db -->
+    <section data-auto-animate>
+        <div class="inline-block px-3 py-0.5 rounded-full text-xs font-mono border border-blue-400/50 bg-blue-500/10 text-[#0369a1] tracking-widest mb-2">Multicontenedor · db</div>
+        <div class="grid grid-cols-2 gap-4 items-center" style="gap:1.5rem;">
+            <pre style="font-size:0.62em;margin:0;"><code class="language-yaml" data-trim data-line-numbers="1-5">services:
+  db:
+    build: ./db
+    volumes:
+      - db-data:/data
+
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - db-data:/data
+    depends_on:
+      db:
+        condition: service_completed_successfully
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+volumes:
+  db-data:</code></pre>
+            <div class="bg-[#f0f4f8] border rounded-xl p-4" style="border-color:rgba(234,88,12,0.5);text-align:left;">
+                <code class="text-[#ea580c]">db</code>
+                <p style="font-size:0.78em;margin:0.6em 0 0;">Contenedor <strong>one-shot</strong>: corre un script Python que crea la base SQLite con los 20 equipos de LaLiga y escribe el archivo en el volumen <code>db-data</code>. Una vez terminado, el contenedor se detiene.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Step by step: backend -->
+    <section data-auto-animate>
+        <div class="inline-block px-3 py-0.5 rounded-full text-xs font-mono border border-blue-400/50 bg-blue-500/10 text-[#0369a1] tracking-widest mb-2">Multicontenedor · backend</div>
+        <div class="grid grid-cols-2 gap-4 items-center" style="gap:1.5rem;">
+            <pre style="font-size:0.62em;margin:0;"><code class="language-yaml" data-trim data-line-numbers="7-15">services:
+  db:
+    build: ./db
+    volumes:
+      - db-data:/data
+
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - db-data:/data
+    depends_on:
+      db:
+        condition: service_completed_successfully
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+volumes:
+  db-data:</code></pre>
+            <div class="bg-[#f0f4f8] border rounded-xl p-4" style="border-color:rgba(22,163,74,0.5);text-align:left;">
+                <code class="text-[#16a34a]">backend · FastAPI</code>
+                <p style="font-size:0.75em;margin:0.6em 0 0;">Monta el mismo volumen <code>db-data</code> para leer el SQLite. El <code>condition: service_completed_successfully</code> garantiza que espera a que <code>db</code> termine de seedear antes de arrancar.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Step by step: frontend -->
+    <section data-auto-animate>
+        <div class="inline-block px-3 py-0.5 rounded-full text-xs font-mono border border-blue-400/50 bg-blue-500/10 text-[#0369a1] tracking-widest mb-2">Multicontenedor · frontend</div>
+        <div class="grid grid-cols-2 gap-4 items-center" style="gap:1.5rem;">
+            <pre style="font-size:0.62em;margin:0;"><code class="language-yaml" data-trim data-line-numbers="17-22">services:
+  db:
+    build: ./db
+    volumes:
+      - db-data:/data
+
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - db-data:/data
+    depends_on:
+      db:
+        condition: service_completed_successfully
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+volumes:
+  db-data:</code></pre>
+            <div class="bg-[#f0f4f8] border rounded-xl p-4" style="border-color:rgba(36,150,237,0.5);text-align:left;">
+                <code class="text-[#2496ED]">frontend · React</code>
+                <p style="font-size:0.75em;margin:0.6em 0 0;">App de Vite + React que hace <code>fetch</code> a <code>localhost:8000/teams</code> y renderiza las tarjetas de cada equipo. Espera a que el backend esté listo antes de arrancar.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Run it -->
+    <section>
+        <div class="inline-block px-3 py-0.5 rounded-full text-xs font-mono border border-blue-400/50 bg-blue-500/10 text-[#0369a1] tracking-widest mb-2">A correrlo</div>
+        <h3 style="margin-bottom:0.8rem;">Tres servicios, un comando</h3>
+        <pre><code class="language-bash" data-trim># docker compose up</code></pre>
+        <div class="grid grid-cols-3 gap-3" style="margin-top:1rem;width:100%;">
+            <div class="bg-[#fff7ed] border border-orange-200 rounded-xl p-3" style="text-align:left;">
+                <code class="text-[#ea580c]" style="font-size:0.8em;">db</code>
+                <p class="text-[#64748b]" style="font-size:0.7em;margin:0.3em 0 0;">Seedea el SQLite en el volumen y termina</p>
+            </div>
+            <div class="bg-[#f0fdf4] border border-green-200 rounded-xl p-3" style="text-align:left;">
+                <code class="text-[#16a34a]" style="font-size:0.8em;">backend</code>
+                <p class="text-[#64748b]" style="font-size:0.7em;margin:0.3em 0 0;">FastAPI en :8000 — GET /teams devuelve JSON</p>
+            </div>
+            <div class="bg-[#eff6ff] border border-blue-200 rounded-xl p-3" style="text-align:left;">
+                <code class="text-[#2496ED]" style="font-size:0.8em;">frontend</code>
+                <p class="text-[#64748b]" style="font-size:0.7em;margin:0.3em 0 0;">React en :5173 — muestra los 20 equipos</p>
+            </div>
+        </div>
+    </section>
+
+</section><!-- /Docker Compose -->
+
+<!-- ═══════════════════════════════════════════════════════
+     COMANDOS
+════════════════════════════════════════════════════════ -->
+<section>
+    <section>
+        <div class="inline-block px-3 py-0.5 rounded-full text-xs font-mono border border-blue-400/50 bg-blue-500/10 text-[#0369a1] tracking-widest mb-2">Referencia rápida</div>
+        <h2>Comandos Esenciales</h2>
+    </section>
+    <section>
+        <div class="grid grid-cols-2 gap-3 text-left">
+            <div class="bg-[#f0f4f8] border border-blue-200 rounded-lg p-3">
+                <code style="color:#0369a1;font-size:0.82em;display:block;margin-bottom:0.2em;">docker pull &lt;image&gt;</code>
+                <small style="color:#64748b;font-size:0.7em;">Descarga una imagen de Docker Hub</small>
+            </div>
+            <div class="bg-[#f0f4f8] border border-blue-200 rounded-lg p-3 fragment">
+                <code style="color:#0369a1;font-size:0.82em;display:block;margin-bottom:0.2em;">docker build -t nombre .</code>
+                <small style="color:#64748b;font-size:0.7em;">Construye imagen desde el Dockerfile actual</small>
+            </div>
+            <div class="bg-[#f0f4f8] border border-blue-200 rounded-lg p-3 fragment">
+                <code style="color:#0369a1;font-size:0.82em;display:block;margin-bottom:0.2em;">docker run -p 8080:80 nginx</code>
+                <small style="color:#64748b;font-size:0.7em;">Ejecuta contenedor con mapeo de puertos</small>
+            </div>
+            <div class="bg-[#f0f4f8] border border-blue-200 rounded-lg p-3 fragment">
+                <code style="color:#0369a1;font-size:0.82em;display:block;margin-bottom:0.2em;">docker ps</code>
+                <small style="color:#64748b;font-size:0.7em;">Lista contenedores en ejecución</small>
+            </div>
+            <div class="bg-[#f0f4f8] border border-blue-200 rounded-lg p-3 fragment">
+                <code style="color:#0369a1;font-size:0.82em;display:block;margin-bottom:0.2em;">docker stop &lt;id&gt;</code>
+                <small style="color:#64748b;font-size:0.7em;">Detiene un contenedor en ejecución</small>
+            </div>
+            <div class="bg-[#f0f4f8] border border-blue-200 rounded-lg p-3 fragment">
+                <code style="color:#0369a1;font-size:0.82em;display:block;margin-bottom:0.2em;">docker rm &lt;id&gt;</code>
+                <small style="color:#64748b;font-size:0.7em;">Elimina un contenedor detenido</small>
+            </div>
+            <div class="bg-[#f0f4f8] border border-blue-200 rounded-lg p-3 fragment">
+                <code style="color:#0369a1;font-size:0.82em;display:block;margin-bottom:0.2em;">docker compose up -d</code>
+                <small style="color:#64748b;font-size:0.7em;">Levanta todos los servicios en segundo plano</small>
+            </div>
+            <div class="bg-[#f0f4f8] border border-blue-200 rounded-lg p-3 fragment">
+                <code style="color:#0369a1;font-size:0.82em;display:block;margin-bottom:0.2em;">docker compose down</code>
+                <small style="color:#64748b;font-size:0.7em;">Detiene y elimina servicios del compose</small>
+            </div>
+        </div>
+    </section>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     DUDAS
+════════════════════════════════════════════════════════ -->
+<section>
+    <h2>¿Dudas?</h2>
+</section>
+
+</div><!-- /slides -->
+</div><!-- /reveal -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/plugin/highlight/highlight.min.js"></script>
+<script>
+    Reveal.initialize({
+        hash: true,
+        center: true,
+        transition: 'slide',
+        transitionSpeed: 'fast',
+        backgroundTransition: 'fade',
+        highlight: { highlightOnLoad: true },
+        plugins: [ RevealHighlight ],
+        width: 1280,
+        height: 720,
+        margin: 0.04,
+        minScale: 0.2,
+        maxScale: 2.0,
+    });
+</script>
+</body>
+</html>

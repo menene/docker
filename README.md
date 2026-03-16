@@ -1,58 +1,166 @@
-
 # Docker
 
-Este repositorio contiene ejemplos prácticos de proyectos Docker organizados por tecnología. Cada uno de los ejemplos tiene su propio directorio y un archivo README.md con instrucciones detalladas para ejecutar los contenedores.
+Material de introducción a Docker — presentación interactiva y ejemplos funcionales listos para correr.
 
-## 📂 Estructura del Repositorio
+## Contenido
 
 ```
-Docker-Projects/
-├── examples/
-│   ├── 01-Express/
-│   ├── 02-FastApi/
-│   ├── 03-DocuWIKI/
-│   ├── 04-LibreOffice/
-│   ├── 05-DevEnv/
-│   ├── 06-Doom/
-├── assets/ (Carpeta de imágenes para la presentación)
-└── index.html (Presentación en Reveal.js)
-└── README.md (Este archivo)
+.
+├── presentation.html   # Presentación reveal.js
+├── index.html          # Landing page
+└── examples/
+    ├── js/             # Node.js HTTP nativo
+    ├── express/        # Node.js + Express
+    ├── fastapi/        # Python + FastAPI
+    ├── nginx/          # NGINX sitio estático
+    ├── multicontainer/ # React + FastAPI + SQLite
+    ├── devenv/         # Express + PostgreSQL + Adminer + NGINX
+    ├── docuwiki/       # DokuWiki
+    ├── libreoffice/    # LibreOffice (browser)
+    ├── doom/           # DOOM
+    ├── jellyfin/       # Jellyfin media server
+    ├── kali-linux/     # Kali Linux (KasmVNC)
+    └── bitwarden/      # Vaultwarden (Bitwarden self-hosted)
 ```
 
-### 🚀 Proyectos Disponibles
+## Ver la presentación
 
-- **Express:** Servidor backend simple con Express.
-- **FastApi:** API simple utilizando FastAPI.
-- **DocuWiki:** Contenedor de una wiki colaborativa.
-- **Libre Office:** Suite de oficina en contenedor.
-- **Dev Environment:** Entorno completo de desarrollo con NGINX, Postgres, Adminer, Frontend y Backend.
-- **Doom:** Contenedor para jugar Doom.
+Abrí `index.html` en el browser o servila con cualquier servidor estático:
 
-Cada uno de estos proyectos tiene su propio archivo README.md con instrucciones específicas.
+```bash
+npx serve .
+```
+
+## Correr los ejemplos
+
+Cada carpeta dentro de `examples/` es independiente. La mayoría solo necesita:
+
+```bash
+cd examples/<nombre>
+docker compose up
+```
+
+Los que tienen `Dockerfile` requieren build:
+
+```bash
+docker compose up --build
+```
+
+### Requisitos
+
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Mac / Windows)
+- Docker Engine + Docker Compose (Linux)
+
+---
+
+## Ejemplos
+
+### `js`
+Servidor Node.js puro sin dependencias externas. Demuestra puertos y bind mounts.
+```bash
+cd examples/js
+docker build -t my-app .
+docker run -p 3000:3000 my-app
+# con volumen:
+docker run -p 3000:3000 -v .:/app my-app
+```
+
+### `express`
+Servidor Express básico. Responde `pong` en `/ping`.
+```bash
+cd examples/express
+docker build -t express-app .
+docker run -p 3000:3000 express-app
+```
+
+### `fastapi`
+API REST con FastAPI. Responde `{"message":"pong"}` en `/ping`.
+```bash
+cd examples/fastapi
+docker build -t fastapi-app .
+docker run -p 8000:8000 fastapi-app
+```
+
+### `nginx`
+Sitio estático servido por NGINX. El contenido de `./site` se monta como volumen.
+```bash
+cd examples/nginx
+docker compose up
+# → http://localhost:8080
+```
+
+### `multicontainer`
+Tres servicios orquestados con Docker Compose: un seeder SQLite (one-shot), un backend FastAPI y un frontend React que muestra equipos de LaLiga.
+```bash
+cd examples/multicontainer
+docker compose up --build
+# → http://localhost:5173
+```
+
+### `devenv`
+Entorno de desarrollo completo: backend Express, frontend HTML, PostgreSQL, Adminer y NGINX como proxy inverso.
+```bash
+cd examples/devenv
+docker compose up --build
+# frontend → http://localhost:8180
+# adminer  → http://localhost:8081
+```
+
+### `docuwiki`
+Wiki personal corriendo desde una imagen de Docker Hub, sin Dockerfile.
+```bash
+cd examples/docuwiki
+docker compose up
+# → http://localhost:8097
+```
+
+### `libreoffice`
+LibreOffice completo accesible desde el browser vía KasmVNC.
+```bash
+cd examples/libreoffice
+docker compose up
+# → http://localhost:3000
+```
+
+### `doom`
+DOOM corriendo en un contenedor.
+```bash
+cd examples/doom
+docker compose up
+# → http://localhost:8880
+```
+
+### `jellyfin`
+Servidor de medios self-hosted. Montá tus carpetas de películas y series en `./media/movies` y `./media/shows`.
+```bash
+cd examples/jellyfin
+mkdir -p media/movies media/shows
+docker compose up
+# → http://localhost:8096
+```
+
+### `kali-linux`
+Kali Linux con escritorio completo accesible desde el browser vía KasmVNC.
+```bash
+cd examples/kali-linux
+docker compose up
+# → http://localhost:3000
+```
+
+### `bitwarden`
+Gestor de contraseñas self-hosted (Vaultwarden, compatible con clientes Bitwarden).
+```bash
+cd examples/bitwarden
+docker compose up
+# → http://localhost:8080
+```
 
 ---
 
-## 🌐 Recursos
+## Versión anterior
 
-- [Documentación de Docker](https://docs.docker.com/)
-- [LinuxServer.io](https://www.linuxserver.io/)
-- [Docker Hub](https://hub.docker.com/)
+La primera versión de esta presentación está disponible en la rama [`v1`](https://github.com/menene/docker/tree/v1).
 
 ---
 
-## 📼 Recursos multimedia
-
-- [100+ Docker Concepts you Need to Know](https://www.youtube.com/watch?v=rIrNIzy6U_g)
-- [Learn Docker in 7 Easy Steps - Full Beginner's Tutorial](https://www.youtube.com/watch?v=gAkwW2tuIqE)
-- [you need to learn Docker RIGHT NOW!! // Docker Containers 101](https://www.youtube.com/watch?v=eGz9DS-aIeY)
-- [DOCKER De NOVATO a PRO! (CURSO COMPLETO EN ESPAÑOL)](https://www.youtube.com/watch?v=CV_Uf3Dq-EU)
-
-## 📝 Notas
-
-- Asegúrate de tener Docker y Docker Compose instalados.
-- Consulta los README.md individuales para más detalles sobre cada proyecto.
-
----
-## 💼 Créditos
-
-Realizado orgullosamente en 🇬🇹 por Erick Marroquín
+Erick Marroquin · [@menene](https://github.com/menene) · marzo 2026
